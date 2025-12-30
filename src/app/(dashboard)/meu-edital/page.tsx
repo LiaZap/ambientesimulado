@@ -15,14 +15,14 @@ export default async function MeuEditalPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-100">Meu Edital Verticalizado</h1>
-                    <p className="text-slate-400">Acompanhe seu progresso ponto a ponto.</p>
+                    <h1 className="text-3xl font-bold text-foreground">Meu Edital Verticalizado</h1>
+                    <p className="text-muted-foreground">Acompanhe seu progresso ponto a ponto rumo à aprovação.</p>
                 </div>
                 <form action={async () => {
                     'use server'
                     await seedEditalTopics()
                 }}>
-                    <Button variant="outline" className="border-slate-700 text-slate-300">
+                    <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">
                         Restaurar Tópicos Padrão
                     </Button>
                 </form>

@@ -19,13 +19,13 @@ export function StudyCycle() {
     const today = new Date().getDay()
 
     return (
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
             <CardHeader className="pb-3">
-                <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-yellow-500" />
+                <CardTitle className="text-xl font-bold text-card-foreground flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
                     Ciclo de Estudos Semanal
                 </CardTitle>
-                <p className="text-sm text-slate-400">Siga o cronograma para maximizar seu desempenho.</p>
+                <p className="text-sm text-muted-foreground">Siga o cronograma para maximizar seu desempenho.</p>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -38,30 +38,30 @@ export function StudyCycle() {
                                 className={cn(
                                     "flex items-center justify-between p-4 rounded-lg border transition-all duration-300 h-full",
                                     isToday
-                                        ? "bg-slate-800/80 border-yellow-500 shadow-md shadow-yellow-500/10 scale-[1.01]"
-                                        : "bg-slate-950/50 border-slate-800 text-slate-500 hover:bg-slate-900"
+                                        ? "bg-primary/20 border-primary shadow-md shadow-primary/10 scale-[1.01]"
+                                        : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
                                 )}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
                                         "h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold",
-                                        isToday ? "bg-yellow-500 text-slate-950" : "bg-slate-800 text-slate-400"
+                                        isToday ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground border border-border"
                                     )}>
                                         {item.label}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className={cn("text-base font-semibold", isToday ? "text-white" : "text-slate-300")}>
+                                        <span className={cn("text-base font-semibold", isToday ? "text-foreground" : "text-muted-foreground")}>
                                             {item.subject}
                                         </span>
                                         {isToday && (
-                                            <span className="text-xs text-yellow-500 font-medium animate-pulse">
+                                            <span className="text-xs text-primary font-medium animate-pulse">
                                                 Estude agora
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
-                                {isToday && <ChevronRight className="h-5 w-5 text-yellow-500" />}
+                                {isToday && <ChevronRight className="h-5 w-5 text-primary" />}
                             </div>
                         )
                     })}

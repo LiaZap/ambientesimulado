@@ -15,7 +15,15 @@ export default async function MeuEditalPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">Meu Edital Verticalizado</h1>
+                    <div className="flex items-center gap-3 mb-2">
+                        <h1 className="text-3xl font-bold text-foreground">Meu Edital Verticalizado</h1>
+                        <span className="bg-yellow-500/10 text-yellow-500 text-xs font-bold px-2 py-1 rounded border border-yellow-500/20">
+                            Baseado no Último Edital
+                        </span>
+                        <span className="bg-blue-500/10 text-blue-400 text-xs font-bold px-2 py-1 rounded border border-blue-500/20 animate-pulse">
+                            Aguardando Edital 2026
+                        </span>
+                    </div>
                     <p className="text-muted-foreground">Acompanhe seu progresso ponto a ponto rumo à aprovação.</p>
                 </div>
                 <form action={async () => {

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Home, BookOpen, Video, PenTool, ClipboardList, Trophy, Sparkles, UserCircle, Shield, LogOut } from "lucide-react"
+import { Home, BookOpen, Video, PenTool, ClipboardList, Trophy, Sparkles, UserCircle, Shield, LogOut, LayoutList } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "@/components/ui/mode-toggle"
 import { logout } from "@/lib/actions"
@@ -11,7 +11,7 @@ import { logout } from "@/lib/actions"
 const routes = [
     { label: "Home", icon: Home, href: "/dashboard" },
     { label: "Meu Edital", icon: BookOpen, href: "/meu-edital" },
-    { label: "Aulas", icon: Video, href: "/aulas" },
+    { label: "Material", icon: LayoutList, href: "/aulas" },
     { label: "Redação IA", icon: PenTool, href: "/redacao" },
     { label: "Simulados", icon: ClipboardList, href: "/simulados" },
     { label: "Ranking", icon: Trophy, href: "/ranking" },

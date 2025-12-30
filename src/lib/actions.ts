@@ -16,6 +16,36 @@ const RegisterSchema = z.object({
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 })
 
+const QuestionSchema = z.object({
+    statement: z.string().min(5, "Enunciado muito curto"),
+    subject: z.string().min(1, "Matéria obrigatória"),
+    topic: z.string().min(1, "Tópico obrigatório"),
+    difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
+    correctAnswer: z.string().min(1, "Gabarito obrigatório"),
+    explanation: z.string().optional(),
+    optionA: z.string().optional(),
+    optionB: z.string().optional(),
+    optionC: z.string().optional(),
+    optionD: z.string().optional(),
+    optionE: z.string().optional(),
+})
+
+const ExamSchema = z.object({
+    title: z.string().min(3, "Título muito curto"),
+    description: z.string().optional(),
+    duration: z.coerce.number().min(1, "Duração inválida"),
+    totalQuestions: z.coerce.number().min(1, "Total de questões inválido")
+})
+
+const ChangePasswordSchema = z.object({
+    currentPassword: z.string().min(1, "Senha atual obrigatória"),
+    newPassword: z.string().min(6, "Nova senha deve ter 6+ caracteres"),
+    confirmPassword: z.string().min(6, "Confirme a nova senha")
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As novas senhas não coincidem",
+    path: ["confirmPassword"],
+})
+
 // Helper for Admin Checks
 async function requireAdmin() {
     const session = await auth()
@@ -297,43 +327,35 @@ export async function createQuestion(_prevState: string | undefined, formData: F
         return "Não autorizado"
     }
 
-    const statement = formData.get("statement") as string
-    const subject = formData.get("subject") as string
-    const topic = formData.get("topic") as string
-    const difficulty = formData.get("difficulty") as string
-    const correctAnswer = formData.get("correctAnswer") as string
-    const explanation = formData.get("explanation") as string
+    const data = Object.fromEntries(formData)
+    const validation = QuestionSchema.safeParse(data)
 
-    // Parse Options A-E
-    const optionA = formData.get("optionA") as string
-    const optionB = formData.get("optionB") as string
-    const optionC = formData.get("optionC") as string
-    const optionD = formData.get("optionD") as string
-    const optionE = formData.get("optionE") as string
+    if (!validation.success) {
+        return "Dados inválidos: " + validation.error.issues.map(i => i.message).join(", ")
+    }
+
+    const q = validation.data
 
     // Check type: True/False vs Multiple Choice
-    // We assume if optionA/B are present, it is multiple choice.
-    const isMultipleChoice = !!optionA && !!optionB
+    const isMultipleChoice = !!q.optionA && !!q.optionB
 
     const options = isMultipleChoice ? {
-        A: optionA,
-        B: optionB,
-        C: optionC,
-        D: optionD,
-        E: optionE
+        A: q.optionA,
+        B: q.optionB,
+        C: q.optionC,
+        D: q.optionD,
+        E: q.optionE
     } : null
-
-    if (!statement || !subject || !topic || !correctAnswer) return "Campos obrigatórios faltando."
 
     try {
         await prisma.question.create({
             data: {
-                statement,
-                subject: subject as any,
-                topic,
-                difficulty: difficulty as any,
-                correctAnswer,
-                explanation,
+                statement: q.statement,
+                subject: q.subject as any,
+                topic: q.topic,
+                difficulty: q.difficulty,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation || "",
                 options: options || undefined,
                 institution: "Cebraspe",
                 year: new Date().getFullYear(),
@@ -479,21 +501,22 @@ export async function deleteQuestion(questionId: string) {
 // Exam Management Actions
 
 export async function createExam(_prevState: string | undefined, formData: FormData) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return "Não autorizado"
+    try { await requireAdmin() } catch { return "Não autorizado" }
 
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
-    const duration = Number(formData.get("duration") || 240) // Default 4 hours
-    const totalQuestions = Number(formData.get("totalQuestions") || 0)
+    const data = Object.fromEntries(formData)
+    const validation = ExamSchema.safeParse(data)
 
-    if (!title) return "Título é obrigatório."
+    if (!validation.success) {
+        return "Dados inválidos: " + validation.error.issues.map(i => i.message).join(", ")
+    }
+
+    const { title, description, duration, totalQuestions } = validation.data
 
     try {
         await prisma.exam.create({
             data: {
                 title,
-                description,
+                description: description || "",
                 duration,
                 totalQuestions,
                 isActive: true
@@ -1010,13 +1033,14 @@ export async function changePassword(_prevState: string | undefined, formData: F
     const session = await auth()
     if (!session?.user?.id || !session?.user?.email) return "Não autorizado."
 
-    const currentPassword = formData.get("currentPassword") as string
-    const newPassword = formData.get("newPassword") as string
-    const confirmPassword = formData.get("confirmPassword") as string
+    const data = Object.fromEntries(formData)
+    const validation = ChangePasswordSchema.safeParse(data)
 
-    if (!currentPassword || !newPassword || !confirmPassword) return "Todos os campos são obrigatórios."
-    if (newPassword !== confirmPassword) return "As novas senhas não coincidem."
-    if (newPassword.length < 6) return "A nova senha deve ter pelo menos 6 caracteres."
+    if (!validation.success) {
+        return "Erro: " + validation.error.issues.map(i => i.message).join(", ")
+    }
+
+    const { currentPassword, newPassword } = validation.data
 
     try {
         const user = await prisma.user.findUnique({ where: { id: session.user.id } })

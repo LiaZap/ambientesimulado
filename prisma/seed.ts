@@ -37,7 +37,10 @@ async function main() {
     // Requested Admin: Angelo
     await prisma.user.upsert({
         where: { email: 'angeloamps013@gmail.com' },
-        update: { role: 'ADMIN' },
+        update: {
+            role: 'ADMIN',
+            password: passwordHash // Force password reset on update
+        },
         create: {
             email: 'angeloamps013@gmail.com',
             name: 'Angelo Admin',
@@ -51,7 +54,10 @@ async function main() {
     // Requested Super Admin: Paulo
     await prisma.user.upsert({
         where: { email: 'contatopaulonvr@gmail.com' },
-        update: { role: 'SUPER_ADMIN' },
+        update: {
+            role: 'SUPER_ADMIN',
+            password: passwordHash // Force password reset on update
+        },
         create: {
             email: 'contatopaulonvr@gmail.com',
             name: 'Paulo SuperAdmin',

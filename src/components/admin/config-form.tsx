@@ -18,6 +18,7 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [webhookUrl, setWebhookUrl] = useState(initialConfig?.n8nWebhookUrl || "")
     const [assistantWebhookUrl, setAssistantWebhookUrl] = useState(initialConfig?.n8nAssistantWebhookUrl || "")
+    const [planningWebhookUrl, setPlanningWebhookUrl] = useState(initialConfig?.n8nPlanningWebhookUrl || "")
     const [siteName, setSiteName] = useState(initialConfig?.siteName || "PRF Ambiente Simulado")
     const [maintenance, setMaintenance] = useState(initialConfig?.maintenanceMode || false)
     const [xpLesson, setXpLesson] = useState(initialConfig?.xpPerLesson || 50)
@@ -31,11 +32,12 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                 data.siteName = siteName
                 data.maintenanceMode = maintenance
             } else if (section === 'gamification') {
-                data.xpPerLesson = Number(xpLesson)
-                data.xpBaseExam = Number(xpExam)
+                data.xpPerLesson = parseInt(xpLesson)
+                data.xpBaseExam = parseInt(xpExam)
             } else if (section === 'integration') {
                 data.n8nWebhookUrl = webhookUrl
                 data.n8nAssistantWebhookUrl = assistantWebhookUrl
+                data.n8nPlanningWebhookUrl = planningWebhookUrl
             }
 
             const result = await updateSystemConfig(data)
@@ -126,6 +128,16 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                                 value={assistantWebhookUrl}
                                 onChange={(e) => setAssistantWebhookUrl(e.target.value)}
                                 placeholder="https://seu-n8n.com/webhook/chat..."
+                                className="bg-slate-950 border-slate-800 text-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="planningWebhookUrl" className="text-slate-300">Webhook Planejamento de Estudos (n8n)</Label>
+                            <Input
+                                id="planningWebhookUrl"
+                                value={planningWebhookUrl}
+                                onChange={(e) => setPlanningWebhookUrl(e.target.value)}
+                                placeholder="https://seu-n8n.com/webhook/planejamento..."
                                 className="bg-slate-950 border-slate-800 text-white"
                             />
                         </div>

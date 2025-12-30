@@ -593,27 +593,32 @@ export async function getSystemConfig() {
     return config
 }
 
-export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
+export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, n8nPlanningWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
     const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
-        return { error: "Unauthorized" }
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return { error: "Não autorizado" }
+
+    try {
+        const config = await prisma.systemConfig.findFirst()
+
+        if (config) {
+            await prisma.systemConfig.update({
+                where: { id: config.id },
+                data: {
+                    ...data
+                }
+            })
+        } else {
+            await prisma.systemConfig.create({
+                data: {
+                    ...data
+                }
+            })
+        }
+        revalidatePath("/admin/config")
+        return { success: true }
+    } catch (_error) {
+        return { error: "Erro ao atualizar configurações" }
     }
-
-    const config = await prisma.systemConfig.findFirst()
-
-    if (config) {
-        await prisma.systemConfig.update({
-            where: { id: config.id },
-            data,
-        })
-    } else {
-        await prisma.systemConfig.create({
-            data,
-        })
-    }
-
-    revalidatePath("/admin/config")
-    return { success: true }
 }
 
 export async function searchQuestions(query: string) {
@@ -802,27 +807,38 @@ export async function chatWithAI(message: string) {
     }
 }
 
-export async function seedEditalTopics() {
+export async function generateStudyPlan(data: any) {
     const session = await auth()
-    userId_topicId: {
-        userId: session.user.id,
-            topicId
-    }
-},
-create: {
-    userId: session.user.id,
-        topicId,
-        [field]: value
-},
-update: {
-    [field]: value
-}
+    if (!session?.user?.id) return { error: "Não autorizado" }
+
+    try {
+        const config = await prisma.systemConfig.findFirst()
+        if (!config?.n8nPlanningWebhookUrl) {
+            return { error: "Planejador de Estudos não configurado (Webhook)." }
+        }
+
+        const response = await fetch(config.n8nPlanningWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...data,
+                userId: session.user.id,
+                userName: session.user.name,
+                userEmail: session.user.email
+            })
         })
-revalidatePath("/meu-edital")
-return { success: true }
-    } catch (_error) {
-    return { error: "Erro ao salvar progresso" }
-}
+
+        if (!response.ok) {
+            return { error: "Erro na comunicação com o Planejador IA." }
+        }
+
+        const result = await response.json()
+        return { success: true, plan: result.plan || "Sem plano gerado." }
+
+    } catch (error) {
+        console.error("Study Plan Error:", error)
+        return { error: "Erro ao gerar plano de estudos." }
+    }
 }
 
 export async function seedEditalTopics() {
@@ -888,5 +904,121 @@ export async function seedEditalTopics() {
     } catch (e) {
         console.error(e)
         return { error: "Erro ao criar tópicos" }
+    }
+}
+
+// Password Recovery Actions
+
+export async function requestPasswordReset(_prevState: string | undefined, formData: FormData) {
+    const email = formData.get("email") as string
+
+    if (!email) return "Email é obrigatório."
+
+    try {
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user) {
+            // Do not reveal that the email doesn't exist
+            return "Se o email existir, um link de verificação foi enviado."
+        }
+
+        // Generate Token
+        const token = crypto.randomUUID()
+        const expires = new Date(new Date().getTime() + 3600 * 1000) // 1 hour
+
+        await prisma.passwordResetToken.create({
+            data: {
+                email,
+                token,
+                expires
+            }
+        })
+
+        // Simulate Sending Email (In production, use Resend/SendGrid/NodeMailer)
+        console.log("========================================")
+        console.log(`PASSWORD RESET LINK FOR ${email}:`)
+        console.log(`http://localhost:3000/resetar-senha?token=${token}`)
+        console.log("========================================")
+
+        return "Link de recuperação enviado (verifique o console)."
+
+    } catch (error) {
+        console.error("Reset Request Error:", error)
+        return "Erro ao processar solicitação."
+    }
+}
+
+export async function resetPassword(_prevState: string | undefined, formData: FormData) {
+    const token = formData.get("token") as string
+    const password = formData.get("password") as string
+    const confirmPassword = formData.get("confirmPassword") as string
+
+    if (!token || !password || !confirmPassword) return "Todos os campos são obrigatórios."
+
+    if (password !== confirmPassword) return "As senhas não coincidem."
+    if (password.length < 6) return "A senha deve ter pelo menos 6 caracteres."
+
+    try {
+        const existingToken = await prisma.passwordResetToken.findUnique({
+            where: { token }
+        })
+
+        if (!existingToken) return "Token inválido."
+
+        if (new Date() > existingToken.expires) {
+            await prisma.passwordResetToken.delete({ where: { token } })
+            return "Token expirado. Solicite novamente."
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        // Update User
+        await prisma.user.update({
+            where: { email: existingToken.email },
+            data: { password: hashedPassword }
+        })
+
+        // Delete Token
+        await prisma.passwordResetToken.delete({ where: { token } })
+
+        return "SUCCESS: Senha alterada com sucesso! Faça login."
+
+    } catch (error) {
+        console.error("Reset Password Error:", error)
+        return "Erro ao redefinir senha."
+    }
+}
+
+export async function changePassword(_prevState: string | undefined, formData: FormData) {
+    const session = await auth()
+    if (!session?.user?.id || !session?.user?.email) return "Não autorizado."
+
+    const currentPassword = formData.get("currentPassword") as string
+    const newPassword = formData.get("newPassword") as string
+    const confirmPassword = formData.get("confirmPassword") as string
+
+    if (!currentPassword || !newPassword || !confirmPassword) return "Todos os campos são obrigatórios."
+    if (newPassword !== confirmPassword) return "As novas senhas não coincidem."
+    if (newPassword.length < 6) return "A nova senha deve ter pelo menos 6 caracteres."
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+
+        if (!user || !user.password) return "Usuário não encontrado."
+
+        const passwordsMatch = await bcrypt.compare(currentPassword, user.password)
+        if (!passwordsMatch) return "Senha atual incorreta."
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { password: hashedPassword }
+        })
+
+        return "SUCCESS: Senha atualizada com sucesso!"
+
+    } catch (error) {
+        console.error("Change Password Error:", error)
+        return "Erro ao alterar senha."
     }
 }

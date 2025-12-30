@@ -1,5 +1,6 @@
 import { getUserProfile } from "@/lib/data"
 import { ProfileForm } from "@/components/profile/profile-form"
+import { ChangePasswordForm } from "@/components/profile/change-password-form"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trophy, Medal, Star, User as UserIcon } from "lucide-react"
@@ -42,7 +43,7 @@ export default async function ProfilePage() {
                 <TabsList className="bg-slate-900 border border-slate-800">
                     <TabsTrigger value="dados" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-slate-950">Dados Pessoais</TabsTrigger>
                     <TabsTrigger value="conquistas" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-slate-950">Conquistas</TabsTrigger>
-                    <TabsTrigger value="assinatura" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-slate-950">Assinatura</TabsTrigger>
+                    <TabsTrigger value="seguranca" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-slate-950">Segurança</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="dados">
@@ -88,25 +89,8 @@ export default async function ProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="assinatura">
-                    <Card className="bg-slate-900 border-slate-800">
-                        <CardHeader>
-                            <CardTitle className="text-white">Plano Atual</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="p-4 bg-slate-950 rounded-lg border border-slate-800">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-white">Plano PRF Elite</h3>
-                                        <p className="text-sm text-slate-400">Acesso total a todos os recursos</p>
-                                    </div>
-                                    <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded-full text-xs font-bold">
-                                        ATIVO
-                                    </span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                <TabsContent value="seguranca">
+                    <ChangePasswordForm />
                 </TabsContent>
             </Tabs>
         </div>

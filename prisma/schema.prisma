@@ -395,9 +395,21 @@ model SystemConfig {
   id              String   @id @default(cuid())
   n8nWebhookUrl   String? // For Essay Correction
   n8nAssistantWebhookUrl String? // For AI Chat/Assistant
+  n8nPlanningWebhookUrl String? // For Study Planning
   siteName        String   @default("PRF Ambiente Simulado")
   maintenanceMode Boolean  @default(false)
   xpPerLesson     Int      @default(50)
   xpBaseExam      Int      @default(20)
   updatedAt       DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
 }

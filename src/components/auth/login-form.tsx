@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
 export function LoginForm() {
     const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined)
@@ -39,6 +40,12 @@ export function LoginForm() {
                             minLength={6}
                             className="bg-slate-950 border-slate-800 focus:ring-yellow-500"
                         />
+                    </div>
+
+                    <div className="flex justify-end">
+                        <Link href="/esqueci-senha" className="text-sm text-yellow-500 hover:underline">
+                            Esqueceu sua senha?
+                        </Link>
                     </div>
 
                     {errorMessage && (

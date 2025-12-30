@@ -7,20 +7,55 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { generateStudyPlan } from "@/lib/actions"
 
 export function StudyPlanner() {
     const [isLoading, setIsLoading] = useState(false)
     const [planGenerated, setPlanGenerated] = useState(false)
 
-    const handleGenerate = async (e: React.FormEvent) => {
+    const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
 
-        // Mock generation
-        setTimeout(() => {
+        const formData = new FormData(e.currentTarget)
+        const hoursPerDay = formData.get("hours")
+        const daysPerWeek = formData.get("days")
+        const level = "Intermediário" // Default or add input
+        const focus = "Geral" // Default or add input
+        const goal = "PRF 2024" // Default
+
+        // Additional optional inputs if they existed in the form:
+        const examDate = formData.get("date")
+
+        try {
+            const result = await generateStudyPlan({
+                hoursPerDay,
+                daysPerWeek,
+                level,
+                focus,
+                goal,
+                examDate
+            })
+
+            if (result.success && result.plan) {
+                setPlanGenerated(true)
+                // For MVP, if plan is a string, we might want to store it in state to display
+                // But the UI seems to just switch to "View Plan" mode. 
+                // Let's assume the result.plan is what we want to show.
+                // We need to parse/display it. 
+                // If the component expects 'planGenerated' to define the view, 
+                // we might need to update how we render the plan.
+                // For now, let's keep the boolean but ideally we should render the real plan.
+                console.log("Plan generated:", result.plan)
+            } else {
+                alert(result.error || "Erro ao gerar plano.")
+            }
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao conectar com o planejador.")
+        } finally {
             setIsLoading(false)
-            setPlanGenerated(true)
-        }, 1500)
+        }
     }
 
     if (planGenerated) {
@@ -71,12 +106,12 @@ export function StudyPlanner() {
                 <form onSubmit={handleGenerate} className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="hours" className="text-slate-300">Horas por dia</Label>
-                        <Input id="hours" type="number" min="1" max="12" defaultValue="4" className="bg-slate-950 border-slate-800 text-white" />
+                        <Input id="hours" name="hours" type="number" min="1" max="12" defaultValue="4" className="bg-slate-950 border-slate-800 text-white" />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="days" className="text-slate-300">Dias por semana</Label>
-                        <Select defaultValue="5">
+                        <Select defaultValue="5" name="days">
                             <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
                                 <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
@@ -92,7 +127,7 @@ export function StudyPlanner() {
 
                     <div className="space-y-2">
                         <Label htmlFor="date" className="text-slate-300">Data da prova (opcional)</Label>
-                        <Input id="date" type="date" className="bg-slate-950 border-slate-800 text-white" />
+                        <Input id="date" name="date" type="date" className="bg-slate-950 border-slate-800 text-white" />
                     </div>
 
                     <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold">

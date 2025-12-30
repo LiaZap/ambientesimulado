@@ -15,9 +15,22 @@ const RegisterSchema = z.object({
 
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
     try {
+        const formDataObj = Object.fromEntries(formData)
+        const email = formDataObj.email as string
+
+        // Check user role for redirect
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: { role: true }
+        })
+
+        const redirectTo = (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN')
+            ? '/admin'
+            : '/dashboard'
+
         await signIn('credentials', {
-            ...Object.fromEntries(formData),
-            redirectTo: '/dashboard'
+            ...formDataObj,
+            redirectTo
         })
     } catch (error) {
         if (error instanceof AuthError) {

@@ -18,7 +18,12 @@ export const authConfig = {
             const isOnAdmin = nextUrl.pathname.startsWith('/admin')
 
             if (isOnDashboard || isOnAdmin) {
-                if (isLoggedIn) return true
+                if (isLoggedIn) {
+                    if (isOnAdmin && auth.user.role !== "ADMIN" && auth.user.role !== "SUPER_ADMIN") {
+                        return Response.redirect(new URL('/dashboard', nextUrl))
+                    }
+                    return true
+                }
                 return false // Redirect to login
             }
 

@@ -20,25 +20,47 @@ async function main() {
 
     // 2. Create/Update Admin User
     const passwordHash = await bcrypt.hash('123456', 10)
-    const user = await prisma.user.upsert({
+
+    // Default Admin (Keep or generic)
+    await prisma.user.upsert({
         where: { email: 'admin@prf.gov.br' },
-        update: {},
+        update: { role: 'ADMIN' },
         create: {
             email: 'admin@prf.gov.br',
             name: 'Admin PRF',
             password: passwordHash,
             role: 'ADMIN',
-            profile: {
-                create: {
-                    level: 99,
-                    xp: 99999,
-                    rank: 'Comandante',
-                    streak: 99
-                }
-            }
+            profile: { create: { level: 99, xp: 99999, rank: 'Comandante', streak: 99 } }
         }
     })
-    console.log(`👤 Admin user created/updated: ${user.email}`)
+
+    // Requested Admin: Angelo
+    await prisma.user.upsert({
+        where: { email: 'angeloamps013@gmail.com' },
+        update: { role: 'ADMIN' },
+        create: {
+            email: 'angeloamps013@gmail.com',
+            name: 'Angelo Admin',
+            password: passwordHash,
+            role: 'ADMIN',
+            profile: { create: { level: 50, xp: 50000, rank: 'Inspetor', streak: 10 } }
+        }
+    })
+    console.log('👤 Admin user created/updated: angeloamps013@gmail.com')
+
+    // Requested Super Admin: Paulo
+    await prisma.user.upsert({
+        where: { email: 'contatopaulonvr@gmail.com' },
+        update: { role: 'SUPER_ADMIN' },
+        create: {
+            email: 'contatopaulonvr@gmail.com',
+            name: 'Paulo SuperAdmin',
+            password: passwordHash,
+            role: 'SUPER_ADMIN',
+            profile: { create: { level: 100, xp: 100000, rank: 'Diretor Geral', streak: 100 } }
+        }
+    })
+    console.log('👤 Super Admin user created/updated: contatopaulonvr@gmail.com')
 
     // --- USERS & COURSES (Base Data) ---
     // Create initial subjects

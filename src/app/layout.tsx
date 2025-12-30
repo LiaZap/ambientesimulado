@@ -14,10 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ambiente Simulado",
+  title: "PRF Ambiente Simulado",
   description: "Plataforma de preparação de alto desempenho para a PRF.",
   icons: {
     icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

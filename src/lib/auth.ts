@@ -51,10 +51,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return session
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
-                token.role = user.role // Capture role from User object on login
+                token.role = user.role // Initial login
             }
+
+            // Optional: Force a refresh if needed, but for now let's trust the re-login. 
+            // Better: If we are in the session (standard JWT flow), we might want to refetch.
+            // But let's verify if `user` is passed on login. Yes it is.
+
+            // To ensure role updates persist even if token exists:
+            if (!user && token.sub) {
+                const existingUser = await prisma.user.findUnique({
+                    where: { id: token.sub },
+                    select: { role: true }
+                })
+                if (existingUser) {
+                    token.role = existingUser.role
+                }
+            }
+
             return token
         }
     }

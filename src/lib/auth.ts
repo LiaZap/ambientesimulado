@@ -77,11 +77,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 })
 
                 // If user deleted or session changed (logged in elsewhere)
-                if (!dbUser || (dbUser.currentSessionId && dbUser.currentSessionId !== token.sid)) {
-                    // Invalidate token by returning null or empty (NextAuth handles this as logout usually or we handle in session)
-                    // Returning null here might crash types, better to set a flag or return null if allowed
-                    return null
-                }
+                if (!dbUser) return null
+
+                // DEBUG: Commenting out strict session check to isolate issue
+                // if (dbUser.currentSessionId && dbUser.currentSessionId !== token.sid) {
+                //    return null
+                // }
 
                 // Update role if changed
                 if (dbUser) {

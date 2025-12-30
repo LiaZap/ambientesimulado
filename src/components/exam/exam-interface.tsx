@@ -318,11 +318,11 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
                 <Card className="bg-white border-slate-200 shadow-xl flex-1 max-h-[calc(100vh-250px)] overflow-hidden flex flex-col">
                     <div className="p-4 bg-slate-50 border-b border-slate-100">
                         <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-slate-500" />
+                            <FileText className="h-4 w-4 text-slate-600" />
                             Folha de Respostas
                         </h3>
                         <Progress value={progress} className="h-1 mt-3" />
-                        <p className="text-xs text-right text-slate-400 mt-1">{Math.round(progress)}% Concluído</p>
+                        <p className="text-xs text-right text-slate-600 font-medium mt-1">{Math.round(progress)}% Concluído</p>
                     </div>
 
                     <div className="p-2 overflow-y-auto flex-1 custom-scrollbar">
@@ -337,8 +337,8 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
                                         className={cn(
                                             "h-10 w-10 text-xs font-bold rounded-lg border flex items-center justify-center transition-all",
                                             isCurrent ? "border-slate-900 bg-slate-900 text-white ring-2 ring-yellow-500 ring-offset-2" :
-                                                isAnswered ? "bg-slate-100 border-slate-300 text-slate-700" :
-                                                    "border-slate-100 text-slate-300 hover:border-slate-300 hover:text-slate-500"
+                                                isAnswered ? "bg-slate-100 border-slate-300 text-slate-900 font-bold" :
+                                                    "border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-900 bg-white"
                                         )}
                                     >
                                         {idx + 1}

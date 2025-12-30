@@ -19,10 +19,6 @@ export const authConfig = {
 
             if (isOnDashboard || isOnAdmin) {
                 if (isLoggedIn) {
-                    // DEBUG: Temporarily allowing all logged users to access /admin to debug role issue
-                    // if (isOnAdmin && auth.user.role !== "ADMIN" && auth.user.role !== "SUPER_ADMIN") {
-                    //    return Response.redirect(new URL('/dashboard', nextUrl))
-                    // }
                     return true
                 }
                 return false // Redirect to login

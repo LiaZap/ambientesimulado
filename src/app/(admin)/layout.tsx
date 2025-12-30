@@ -14,9 +14,17 @@ export default async function AdminLayout({
     }
 
     // Role Guard
-    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
-        redirect("/dashboard")
-    }
+    // Role Guard DEBUG
+    // if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
+    //     return (
+    //         <div className="flex flex-col items-center justify-center h-screen text-white">
+    //            <h1 className="text-2xl font-bold">Acesso Negado (Debug)</h1> 
+    //            <p>Seu cargo atual é: {session.user.role || 'NENHUM'}</p>
+    //            <p>ID: {session.user.id}</p>
+    //            <a href="/dashboard" className="text-yellow-500 mt-4">Voltar</a>
+    //         </div>
+    //     )
+    // }
 
     return (
         <div className="flex h-screen bg-[#020617] text-slate-100 overflow-hidden">

@@ -21,8 +21,7 @@ export const authConfig = {
                 if (isLoggedIn) {
                     // DEBUG: Temporarily allowing all logged users to access /admin to debug role issue
                     if (isOnAdmin && auth.user.role !== "ADMIN" && auth.user.role !== "SUPER_ADMIN") {
-                        // return Response.redirect(new URL('/dashboard', nextUrl))
-                        console.log("Middleware blocked Access (DEBUG SKIP):", auth.user.role)
+                        return Response.redirect(new URL('/dashboard', nextUrl))
                     }
                     return true
                 }

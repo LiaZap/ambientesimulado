@@ -1,0 +1,400 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  emailVerified     DateTime?
+  password          String?  // bcrypt hash
+  name              String
+  avatar            String?
+  role              Role     @default(USER)
+  subscriptionId    String?  @unique
+  subscription      Subscription?
+  profile           Profile?
+  progress          Progress[]
+  essays            Essay[]
+  answers           Answer[]
+  achievements      UserAchievement[]
+  notes             Note[]
+  bookmarks         Bookmark[]
+  chatMessages      ChatMessage[]
+  editalProgress    UserEditalProgress[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastLoginAt       DateTime?
+  lastLoginIp       String?
+  twoFactorSecret   String?  // encrypted
+  twoFactorEnabled  Boolean  @default(false)
+  
+  @@index([email])
+  @@index([subscriptionId])
+}
+
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId  String   @unique
+  stripeSubscriptionId String @unique
+  stripePriceId     String
+  status            SubscriptionStatus // ACTIVE, CANCELED, PAST_DUE
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level           Int      @default(1)
+  xp              Int      @default(0)
+  rank            String   @default("Recruta")
+  streak          Int      @default(0)
+  lastStudyDate   DateTime?
+  totalStudyTime  Int      @default(0) // em minutos
+  questionsAnswered Int    @default(0)
+  questionsCorrect  Int    @default(0)
+  targetExamDate  DateTime?
+  studyGoalHours  Int      @default(2)
+  studyDays       String[] // ["SEG", "TER", ...]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  subject     Subject
+  order       Int
+  modules     Module[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  order       Int
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id              String   @id @default(cuid())
+  moduleId        String
+  module          Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  videoUrl        String
+  videoDuration   Int      // em segundos
+  thumbnailUrl    String?
+  transcription   String?  // @db.Text in postgres is just String
+  summary         String?  
+  order           Int
+  questions       Question[]
+  progress        Progress[]
+  bookmarks       Bookmark[]
+  notes           Note[]
+  isLocked        Boolean  @default(false)
+  unlockCriteria  String?  // "previous_completed", "xp_level_5"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Progress {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId        String
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed       Boolean  @default(false)
+  watchedSeconds  Int      @default(0)
+  lastWatchedAt   DateTime @default(now())
+  completedAt     DateTime?
+  
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model EditalTopic {
+  id          String   @id @default(cuid())
+  subject     Subject
+  title       String
+  priority    Priority // HIGH, MEDIUM, LOW
+  theory      Boolean  @default(false)
+  pdf         Boolean  @default(false)
+  review      Boolean  @default(false)
+  accuracy    Float?   // percentual de acerto
+  order       Int
+  progress    UserEditalProgress[]
+}
+
+model UserEditalProgress {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicId       String
+  topic         EditalTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+  hasStudiedTheory  Boolean @default(false)
+  hasStudiedPDF     Boolean @default(false)
+  hasReviewed       Boolean @default(false)
+  
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([userId, topicId])
+  @@index([userId])
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  lessonId    String?
+  lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  exams       Exam[]   @relation("ExamQuestions")
+  subject     Subject
+  topic       String
+  statement   String   
+  correctAnswer String // "A", "B", "C", "D", "E" or "CERTO"/"ERRADO" for legacy
+  options     Json?    // { A: "...", B: "..." }
+  explanation String?  
+  difficulty  Difficulty // EASY, MEDIUM, HARD
+  year        Int?
+  institution String?  // "Cebraspe", "FGV", etc
+  answers     Answer[]
+  createdAt   DateTime @default(now())
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userAnswer  String   // "A", "B"...
+  isCorrect   Boolean
+  timeSpent   Int      // em segundos
+  answeredAt  DateTime @default(now())
+  examAttemptId String?
+  examAttempt ExamAttempt? @relation(fields: [examAttemptId], references: [id])
+  
+  @@index([userId])
+  @@index([questionId])
+}
+
+model Exam {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  totalQuestions Int
+  duration    Int      // em minutos
+  year        Int?
+  questions   Question[] @relation("ExamQuestions")
+  attempts    ExamAttempt[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model ExamAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  examId          String
+  exam            Exam     @relation(fields: [examId], references: [id])
+  status          ExamStatus // IN_PROGRESS, COMPLETED, ABANDONED
+  score           Float?
+  correctAnswers  Int      @default(0)
+  wrongAnswers    Int      @default(0)
+  timeSpent       Int      @default(0) // em segundos
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  answers         Answer[]
+  
+  @@index([userId])
+  @@index([examId])
+}
+
+model Essay {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme       String
+  content     String   
+  imageUrl    String?  // se for manuscrita
+  score       Float?
+  criteria    Json?    // breakdown de notas
+  feedback    String?  
+  suggestions String?  
+  rewrite     String?  
+  status      EssayStatus // PENDING, CORRECTED
+  submittedAt DateTime @default(now())
+  correctedAt DateTime?
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  rarity      Rarity   // COMMON, RARE, EPIC, LEGENDARY
+  xpReward    Int
+  criteria    Json     // condições para unlock
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  progress      Int      @default(0)
+  total         Int
+  unlocked      Boolean  @default(false)
+  unlockedAt    DateTime?
+  
+  @@unique([userId, achievementId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  content   String   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId, lessonId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  timestamp Int      // segundos no vídeo
+  note      String?
+  createdAt DateTime @default(now())
+  
+  @@index([userId, lessonId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ChatRole // USER, ASSISTANT
+  content   String   
+  tokens    Int?
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // "LOGIN", "SUBSCRIPTION_CHANGE", "DATA_EXPORT"
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// Enums
+enum Role {
+  USER
+  PREMIUM
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+enum Subject {
+  PORTUGUES
+  DIREITO_CONSTITUCIONAL
+  DIREITO_ADMINISTRATIVO
+  DIREITO_PENAL
+  LEGISLACAO_TRANSITO
+  FISICA
+  RACIOCINIO_LOGICO
+  INFORMATICA
+  ETICA
+  NOCOES_CIDADANIA
+  REQUISITOS
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ExamStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum EssayStatus {
+  PENDING
+  CORRECTED
+  FAILED
+}
+
+enum Rarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model SystemConfig {
+  id              String   @id @default(cuid())
+  n8nWebhookUrl   String?
+  siteName        String   @default("PRF Ambiente Simulado")
+  maintenanceMode Boolean  @default(false)
+  xpPerLesson     Int      @default(50)
+  xpBaseExam      Int      @default(20)
+  updatedAt       DateTime @updatedAt
+}

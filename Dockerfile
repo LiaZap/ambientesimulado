@@ -43,10 +43,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install OpenSSL for Prisma and tsx/dependencies for seeding
-RUN apk add --no-cache openssl
-RUN npm install -g tsx
-RUN npm install bcryptjs
+
 
 COPY --from=builder /app/public ./public
 
@@ -59,6 +56,11 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Install OpenSSL for Prisma and tsx/dependencies for seeding
+RUN apk add --no-cache openssl
+RUN npm install -g tsx
+RUN npm install bcryptjs
 
 USER nextjs
 

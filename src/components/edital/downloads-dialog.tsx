@@ -30,10 +30,11 @@ export function DownloadsDialog() {
                         Baixe os arquivos de referência para seus estudos.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
                     <div className="grid grid-cols-1 gap-4">
+                        {/* Edital e Conteúdo */}
                         <a
-                            href="/downloads/edital-prf-2021.pdf"
+                            href="/downloads/1 - EDITAL_PRF_2021_ABERTURA.pdf"
                             download
                             className="flex items-center p-4 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors group"
                         >
@@ -41,14 +42,14 @@ export function DownloadsDialog() {
                                 <FileText className="h-6 w-6 text-red-500" />
                             </div>
                             <div className="flex-1">
-                                <h4 className="font-semibold text-sm">Edital PRF 2021 (Completo)</h4>
+                                <h4 className="font-semibold text-sm">Edital PRF 2021 (Abertura)</h4>
                                 <p className="text-xs text-slate-400">Formato PDF • Oficial</p>
                             </div>
                             <Download className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
                         </a>
 
                         <a
-                            href="/downloads/conteudo-programatico.docx"
+                            href="/downloads/2 - CONTEUDO DA PROVA PRF 2021.docx"
                             download
                             className="flex items-center p-4 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors group"
                         >
@@ -61,6 +62,56 @@ export function DownloadsDialog() {
                             </div>
                             <Download className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
                         </a>
+
+                        {/* Provas e Gabaritos */}
+                        <div className="pt-2 border-t border-slate-800">
+                            <h5 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Prova & Gabaritos (2021)</h5>
+                            <div className="grid gap-3">
+                                <a href="/downloads/3 - Prova GERAL PRF objetiva PRF-2021 .pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-400" /> Caderno de Prova (Geral)</span>
+                                    <Download className="h-4 w-4 text-slate-500" />
+                                </a>
+                                <a href="/downloads/4 - Gabarito Geral 9 ate 120 - PRF 2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-green-500" /> Gabarito Geral (9 a 120)</span>
+                                    <Download className="h-4 w-4 text-slate-500" />
+                                </a>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <a href="/downloads/6 - Gabarito Inglês _PRF_2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                        <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-400" /> Gab. Inglês</span>
+                                        <Download className="h-4 w-4 text-slate-500" />
+                                    </a>
+                                    <a href="/downloads/8 - Gabarito Espanhol _PRF_2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                        <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-400" /> Gab. Espanhol</span>
+                                        <Download className="h-4 w-4 text-slate-500" />
+                                    </a>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <a href="/downloads/5 - Prova INGLÊS_PRF_2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                        <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-400" /> Prova Inglês</span>
+                                        <Download className="h-4 w-4 text-slate-500" />
+                                    </a>
+                                    <a href="/downloads/7 - Prova ESPANHOL_PRF_2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                        <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-400" /> Prova Espanhol</span>
+                                        <Download className="h-4 w-4 text-slate-500" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Redação */}
+                        <div className="pt-2 border-t border-slate-800">
+                            <h5 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Redação Discursiva</h5>
+                            <div className="grid gap-3">
+                                <a href="/downloads/9 - REDAÇÃO PRF- prova 2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-purple-400" /> Folha da Redação (Prova)</span>
+                                    <Download className="h-4 w-4 text-slate-500" />
+                                </a>
+                                <a href="/downloads/10 - REDAÇÃO - padrão resposta 2021.pdf" download className="flex items-center justify-between p-3 rounded bg-slate-800/30 hover:bg-slate-800 border border-slate-700/50 transition-colors text-sm">
+                                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-purple-400" /> Padrão de Resposta (Espelho)</span>
+                                    <Download className="h-4 w-4 text-slate-500" />
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </DialogContent>

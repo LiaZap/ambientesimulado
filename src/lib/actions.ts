@@ -6,6 +6,9 @@ import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 import { checkAchievements } from "@/lib/gamification"
+import { checkRateLimit, getClientIp } from "@/lib/security"
+import { revalidatePath } from "next/cache"
+import crypto from "crypto" // Import crypto here
 
 const RegisterSchema = z.object({
     name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -13,16 +16,33 @@ const RegisterSchema = z.object({
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 })
 
-// ... existing code ...
+// Helper for Admin Checks
+async function requireAdmin() {
+    const session = await auth()
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
+        throw new Error("Unauthorized: Admin access required.")
+    }
+    return session
+}
+
 export async function logout() {
     await signOut({ redirectTo: '/login' })
 }
 
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
-    // ... existing code ...
     try {
         const formDataObj = Object.fromEntries(formData)
         const email = formDataObj.email as string
+        const ip = await getClientIp()
+
+        // RATE LIMIT: 5 attempts per minute per IP
+        const isAllowed = await checkRateLimit(`login:${ip}`, 5, 60)
+        if (!isAllowed) {
+            return "Muitas tentativas. Tente novamente em 1 minuto."
+        }
+
+        // RATE LIMIT: 10 attempts per minute per Email (prevent locking out user by attacker)
+        // Adjust logic as needed. 
 
         // Check user role for redirect
         const user = await prisma.user.findUnique({
@@ -52,6 +72,10 @@ export async function authenticate(_prevState: string | undefined, formData: For
 }
 
 export async function register(_prevState: string | undefined, formData: FormData) {
+    const ip = await getClientIp()
+    const isAllowed = await checkRateLimit(`register:${ip}`, 3, 3600) // 3 accounts per hour per IP
+    if (!isAllowed) return "Limite de criação de contas excedido."
+
     const data = Object.fromEntries(formData)
     const validation = RegisterSchema.safeParse(data)
 
@@ -267,8 +291,9 @@ export async function finishExamAttempt(examId: string, answers: Record<string, 
 // ... existing code ...
 
 export async function createQuestion(_prevState: string | undefined, formData: FormData) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
+    try {
+        await requireAdmin()
+    } catch {
         return "Não autorizado"
     }
 
@@ -322,10 +347,7 @@ export async function createQuestion(_prevState: string | undefined, formData: F
 }
 
 export async function createCourse(_prevState: string | undefined, formData: FormData) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
-        return "Não autorizado"
-    }
+    try { await requireAdmin() } catch { return "Não autorizado" }
 
     const title = formData.get("title") as string
     const description = formData.get("description") as string
@@ -352,10 +374,7 @@ export async function createCourse(_prevState: string | undefined, formData: For
 }
 
 export async function createModule(_prevState: string | undefined, formData: FormData) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
-        return "Não autorizado"
-    }
+    try { await requireAdmin() } catch { return "Não autorizado" }
 
     const courseId = formData.get("courseId") as string
     const title = formData.get("title") as string
@@ -378,10 +397,7 @@ export async function createModule(_prevState: string | undefined, formData: For
 }
 
 export async function createLesson(_prevState: string | undefined, formData: FormData) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
-        return "Não autorizado"
-    }
+    try { await requireAdmin() } catch { return "Não autorizado" }
 
     const moduleId = formData.get("moduleId") as string
     const title = formData.get("title") as string
@@ -581,8 +597,6 @@ export async function createQuestionsBulk(jsonContent: string) {
     }
 }
 
-import { revalidatePath } from "next/cache"
-
 export async function getSystemConfig() {
     const session = await auth()
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
@@ -594,10 +608,9 @@ export async function getSystemConfig() {
 }
 
 export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, n8nPlanningWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return { error: "Não autorizado" }
-
     try {
+        await requireAdmin()
+
         const config = await prisma.systemConfig.findFirst()
 
         if (config) {
@@ -914,10 +927,15 @@ export async function requestPasswordReset(_prevState: string | undefined, formD
 
     if (!email) return "Email é obrigatório."
 
+    // RATE LIMIT: 3 attempts per hour per Email
+    const isAllowed = await checkRateLimit(`reset:${email}`, 3, 3600)
+    if (!isAllowed) return "Muitas solicitações. Aguarde antes de tentar novamente."
+
     try {
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user) {
             // Do not reveal that the email doesn't exist
+            // but we consume rate limit anyway (done above)
             return "Se o email existir, um link de verificação foi enviado."
         }
 

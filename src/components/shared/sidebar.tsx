@@ -3,9 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Home, BookOpen, Video, PenTool, ClipboardList, Trophy, Sparkles, UserCircle, Shield } from "lucide-react"
+import { Home, BookOpen, Video, PenTool, ClipboardList, Trophy, Sparkles, UserCircle, Shield, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "@/components/ui/mode-toggle"
+import { logout } from "@/lib/actions"
 
 const routes = [
     { label: "Home", icon: Home, href: "/dashboard" },
@@ -103,6 +104,13 @@ export function Sidebar({ user }: SidebarProps) {
                 </Link>
                 <div className="shrink-0">
                     <ModeToggle />
+                    <button
+                        onClick={async () => await logout()}
+                        className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                        title="Sair"
+                    >
+                        <LogOut className="h-5 w-5" />
+                    </button>
                 </div>
             </div>
         </div>

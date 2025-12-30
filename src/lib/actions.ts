@@ -1,6 +1,6 @@
 'use server'
 
-import { signIn, auth } from "@/lib/auth"
+import { signIn, auth, signOut } from "@/lib/auth"
 import { AuthError } from "next-auth"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
@@ -13,7 +13,13 @@ const RegisterSchema = z.object({
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 })
 
+// ... existing code ...
+export async function logout() {
+    await signOut({ redirectTo: '/login' })
+}
+
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
+    // ... existing code ...
     try {
         const formDataObj = Object.fromEntries(formData)
         const email = formDataObj.email as string

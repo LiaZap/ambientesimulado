@@ -34,6 +34,7 @@ model User {
   lastLoginIp       String?
   twoFactorSecret   String?  // encrypted
   twoFactorEnabled  Boolean  @default(false)
+  currentSessionId  String?
   
   @@index([email])
   @@index([subscriptionId])

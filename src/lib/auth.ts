@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
+import crypto from "crypto"
 import { authConfig } from "@/auth.config"
 
 // Helper schema for login
@@ -33,7 +34,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                     const passwordsMatch = await bcrypt.compare(password, user.password)
 
-                    if (passwordsMatch) return user
+                    if (passwordsMatch) {
+                        // Single Session Enforcement: Generate new Session ID
+                        const newSessionId = crypto.randomUUID()
+
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { currentSessionId: newSessionId }
+                        })
+
+                        return { ...user, currentSessionId: newSessionId }
+                    }
                 }
 
                 return null
@@ -52,22 +63,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return session
         },
         async jwt({ token, user, trigger, session }) {
+            // Initial Login
             if (user) {
-                token.role = user.role // Initial login
+                token.role = user.role
+                token.sid = (user as any).currentSessionId // Store session ID
             }
 
-            // Optional: Force a refresh if needed, but for now let's trust the re-login. 
-            // Better: If we are in the session (standard JWT flow), we might want to refetch.
-            // But let's verify if `user` is passed on login. Yes it is.
-
-            // To ensure role updates persist even if token exists:
-            if (!user && token.sub) {
-                const existingUser = await prisma.user.findUnique({
+            // Session Enforcement Check
+            if (token.sub) {
+                const dbUser = await prisma.user.findUnique({
                     where: { id: token.sub },
-                    select: { role: true }
+                    select: { role: true, currentSessionId: true }
                 })
-                if (existingUser) {
-                    token.role = existingUser.role
+
+                // If user deleted or session changed (logged in elsewhere)
+                if (!dbUser || (dbUser.currentSessionId && dbUser.currentSessionId !== token.sid)) {
+                    // Invalidate token by returning null or empty (NextAuth handles this as logout usually or we handle in session)
+                    // Returning null here might crash types, better to set a flag or return null if allowed
+                    return null
+                }
+
+                // Update role if changed
+                if (dbUser) {
+                    token.role = dbUser.role
                 }
             }
 

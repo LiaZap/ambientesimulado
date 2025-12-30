@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { chatWithAI } from "@/lib/actions"
 
 export function ChatInterface() {
     const [messages, setMessages] = useState([
@@ -24,20 +25,26 @@ export function ChatInterface() {
         setIsLoading(true)
 
         try {
-            // TODO: Connect to n8n webhook here
-            // const response = await fetch('/api/chat', { ... })
+            const result = await chatWithAI(input)
 
-            // Mock response for now
-            setTimeout(() => {
+            if (result.error) {
                 setMessages(prev => [...prev, {
                     role: 'assistant',
-                    content: 'Esta é uma resposta simulada. A integração com o Webhook do n8n será configurada em breve.'
+                    content: `⚠️ ${result.error}`
                 }])
-                setIsLoading(false)
-            }, 1000)
-
+            } else if (result.success && result.response) {
+                setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: result.response
+                }])
+            }
         } catch (error) {
             console.error(error)
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: 'Erro ao conectar-se com o assistente.'
+            }])
+        } finally {
             setIsLoading(false)
         }
     }

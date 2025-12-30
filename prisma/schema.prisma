@@ -393,7 +393,8 @@ enum ChatRole {
 
 model SystemConfig {
   id              String   @id @default(cuid())
-  n8nWebhookUrl   String?
+  n8nWebhookUrl   String? // For Essay Correction
+  n8nAssistantWebhookUrl String? // For AI Chat/Assistant
   siteName        String   @default("PRF Ambiente Simulado")
   maintenanceMode Boolean  @default(false)
   xpPerLesson     Int      @default(50)

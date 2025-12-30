@@ -593,7 +593,7 @@ export async function getSystemConfig() {
     return config
 }
 
-export async function updateSystemConfig(data: { n8nWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
+export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
     const session = await auth()
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return { error: "Unauthorized" }
@@ -767,6 +767,62 @@ export async function toggleEditalProgress(topicId: string, field: 'hasStudiedTh
     } catch (_error) {
         return { error: "Erro ao salvar progresso" }
     }
+}
+
+export async function chatWithAI(message: string) {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Não autorizado" }
+
+    try {
+        const config = await prisma.systemConfig.findFirst()
+        if (!config?.n8nAssistantWebhookUrl) {
+            return { error: "Assistente IA não configurado." }
+        }
+
+        const response = await fetch(config.n8nAssistantWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                userId: session.user.id,
+                userName: session.user.name
+            })
+        })
+
+        if (!response.ok) {
+            return { error: "Erro na comunicação com a IA." }
+        }
+
+        const data = await response.json()
+        return { success: true, response: data.response || "Sem resposta da IA." }
+
+    } catch (error) {
+        console.error("Chat AI Error:", error)
+        return { error: "Erro ao processar mensagem." }
+    }
+}
+
+export async function seedEditalTopics() {
+    const session = await auth()
+    userId_topicId: {
+        userId: session.user.id,
+            topicId
+    }
+},
+create: {
+    userId: session.user.id,
+        topicId,
+        [field]: value
+},
+update: {
+    [field]: value
+}
+        })
+revalidatePath("/meu-edital")
+return { success: true }
+    } catch (_error) {
+    return { error: "Erro ao salvar progresso" }
+}
 }
 
 export async function seedEditalTopics() {

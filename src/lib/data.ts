@@ -180,7 +180,12 @@ export async function getQuestions() {
 
 export async function getRanking() {
     const ranking = await prisma.user.findMany({
-        where: { profile: { isNot: null } },
+        where: {
+            role: {
+                notIn: ['ADMIN', 'SUPER_ADMIN']
+            },
+            profile: { isNot: null }
+        },
         select: {
             id: true,
             name: true,
@@ -188,6 +193,7 @@ export async function getRanking() {
             profile: {
                 select: {
                     xp: true,
+                    rank: true,
                     level: true
                 }
             }

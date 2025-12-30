@@ -17,6 +17,7 @@ interface AdminConfigFormProps {
 export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [webhookUrl, setWebhookUrl] = useState(initialConfig?.n8nWebhookUrl || "")
+    const [assistantWebhookUrl, setAssistantWebhookUrl] = useState(initialConfig?.n8nAssistantWebhookUrl || "")
     const [siteName, setSiteName] = useState(initialConfig?.siteName || "PRF Ambiente Simulado")
     const [maintenance, setMaintenance] = useState(initialConfig?.maintenanceMode || false)
     const [xpLesson, setXpLesson] = useState(initialConfig?.xpPerLesson || 50)
@@ -34,6 +35,7 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                 data.xpBaseExam = Number(xpExam)
             } else if (section === 'integration') {
                 data.n8nWebhookUrl = webhookUrl
+                data.n8nAssistantWebhookUrl = assistantWebhookUrl
             }
 
             const result = await updateSystemConfig(data)
@@ -108,12 +110,22 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="webhookUrl" className="text-slate-300">Webhook URL (Chat IA)</Label>
+                            <Label htmlFor="webhookUrl" className="text-slate-300">Webhook Redação (n8n)</Label>
                             <Input
                                 id="webhookUrl"
                                 value={webhookUrl}
                                 onChange={(e) => setWebhookUrl(e.target.value)}
-                                placeholder="https://seu-n8n.com/webhook/..."
+                                placeholder="https://seu-n8n.com/webhook/redacao..."
+                                className="bg-slate-950 border-slate-800 text-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="assistantWebhookUrl" className="text-slate-300">Webhook Assistente IA (n8n)</Label>
+                            <Input
+                                id="assistantWebhookUrl"
+                                value={assistantWebhookUrl}
+                                onChange={(e) => setAssistantWebhookUrl(e.target.value)}
+                                placeholder="https://seu-n8n.com/webhook/chat..."
                                 className="bg-slate-950 border-slate-800 text-white"
                             />
                         </div>

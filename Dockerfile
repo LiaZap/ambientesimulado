@@ -43,9 +43,10 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install OpenSSL for Prisma and tsx for seeding
+# Install OpenSSL for Prisma and tsx/dependencies for seeding
 RUN apk add --no-cache openssl
 RUN npm install -g tsx
+RUN npm install bcryptjs
 
 COPY --from=builder /app/public ./public
 

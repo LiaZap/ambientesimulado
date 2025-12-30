@@ -4,7 +4,41 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-    console.log('🌱 Starting seed...')
+    console.log('🌱 Start seeding...')
+
+    // 1. CLEANUP (Prevent Duplicates)
+    console.log('🧹 Cleaning up old data...')
+    try {
+        await prisma.answer.deleteMany({})
+        await prisma.question.deleteMany({})
+        await prisma.examAttempt.deleteMany({})
+        await prisma.exam.deleteMany({})
+        console.log('✨ Old data cleared.')
+    } catch (e) {
+        console.warn('⚠️  Could not clear some data (maybe cascade issues), proceeding...')
+    }
+
+    // 2. Create/Update Admin User
+    const passwordHash = await bcrypt.hash('123456', 10)
+    const user = await prisma.user.upsert({
+        where: { email: 'admin@prf.gov.br' },
+        update: {},
+        create: {
+            email: 'admin@prf.gov.br',
+            name: 'Admin PRF',
+            password: passwordHash,
+            role: 'ADMIN',
+            profile: {
+                create: {
+                    level: 99,
+                    xp: 99999,
+                    rank: 'Comandante',
+                    streak: 99
+                }
+            }
+        }
+    })
+    console.log(`👤 Admin user created/updated: ${user.email}`)
 
     // --- USERS & COURSES (Base Data) ---
     // Create initial subjects

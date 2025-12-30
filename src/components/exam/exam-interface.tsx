@@ -337,8 +337,8 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
                                         className={cn(
                                             "h-10 w-10 text-xs font-bold rounded-lg border flex items-center justify-center transition-all",
                                             isCurrent ? "border-slate-900 bg-slate-900 text-white ring-2 ring-yellow-500 ring-offset-2" :
-                                                isAnswered ? "bg-slate-100 border-slate-300 text-slate-900 font-bold" :
-                                                    "border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-900 bg-white"
+                                                isAnswered ? "bg-slate-200 border-slate-400 text-slate-950 font-black" :
+                                                    "border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 bg-white"
                                         )}
                                     >
                                         {idx + 1}

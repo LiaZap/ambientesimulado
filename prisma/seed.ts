@@ -235,7 +235,7 @@ async function main() {
                     institution: 'Cebraspe',
                     year: 2025,
                     options: { "C": "CERTO", "E": "ERRADO" },
-                    exam: {
+                    exams: {
                         connect: { id: createdExam.id }
                     }
                 }

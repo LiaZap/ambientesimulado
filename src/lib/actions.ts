@@ -780,7 +780,7 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
         }
 
         revalidatePath("/redacao")
-        return { success: true, message: "Redação enviada com sucesso! Aguarde a correção.", essayId: essay.id }
+        return { success: true, message: "Aguarde alguns segundos, estamos corrigindo sua redação.", essayId: essay.id }
     } catch (error) {
         console.error(error)
         return { error: "Erro ao enviar redação." }

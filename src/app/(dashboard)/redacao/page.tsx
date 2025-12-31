@@ -45,7 +45,7 @@ export default async function EssaysPage() {
                                                 <Clock className="h-3 w-3" />
                                                 <span>{new Date(essay.submittedAt).toLocaleDateString()}</span>
                                             </div>
-                                            {essay.score !== null && (
+                                            {essay.score !== null && essay.score > 0 && (
                                                 <div className="font-bold text-yellow-500">
                                                     Nota: {essay.score.toFixed(1)}
                                                 </div>

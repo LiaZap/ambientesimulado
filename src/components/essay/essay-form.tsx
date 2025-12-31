@@ -88,7 +88,7 @@ export function EssayForm() {
                     </div>
 
                     {message && (
-                        <div className={`text-sm font-medium text-center p-2 rounded ${message.includes('sucesso') ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                        <div className={`text-sm font-medium text-center p-2 rounded ${message.includes('sucesso') || message.includes('Aguarde') ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                             {message}
                         </div>
                     )}

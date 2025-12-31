@@ -122,7 +122,7 @@ export default async function EssayDetailPage({ params }: { params: Promise<{ id
             )}
 
             {/* Suggestions */}
-            {essay.status === 'CORRECTED' && essay.suggestions && (
+            {essay.status === 'CORRECTED' && essay.suggestions && essay.suggestions !== "Sem sugestões." && (
                 <Card className="bg-slate-900 border-slate-800 text-slate-100">
                     <CardHeader>
                         <CardTitle className="text-yellow-500">Sugestões de Melhoria</CardTitle>

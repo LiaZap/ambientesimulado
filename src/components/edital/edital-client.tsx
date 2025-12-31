@@ -5,7 +5,8 @@ import { toggleEditalProgress } from "@/lib/actions"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ChevronDown, ChevronRight, BookOpen, FileText, CheckCircle, Trophy, BarChart3 } from "lucide-react"
+import { ChevronDown, ChevronRight, BookOpen, FileText, CheckCircle, Trophy, BarChart3, Download } from "lucide-react"
+import { DownloadsDialog } from "@/components/edital/downloads-dialog"
 
 const SUBJECT_LABELS: Record<string, string> = {
     'PORTUGUES': 'Língua Portuguesa',
@@ -98,6 +99,22 @@ export function EditalClient({ topics }: { topics: Topic[] }) {
                             style={{ width: `${globalPercent}%` }}
                         />
                     </div>
+                </CardContent>
+            </Card>
+
+            {/* Materials Card */}
+            <Card className="bg-slate-900 border-slate-800 shadow-lg">
+                <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Download className="h-5 w-5 text-yellow-500" />
+                            Material de Apoio Oficial
+                        </h3>
+                        <p className="text-slate-400 mt-2">
+                            Acesse o Edital 2021, Conteúdo Verticalizado e todas as provas e gabaritos anteriores.
+                        </p>
+                    </div>
+                    <DownloadsDialog />
                 </CardContent>
             </Card>
 

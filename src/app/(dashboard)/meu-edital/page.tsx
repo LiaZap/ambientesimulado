@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { EditalClient } from "@/components/edital/edital-client"
 import { seedEditalTopics } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
-import { DownloadsDialog } from "@/components/edital/downloads-dialog"
+
 
 export default async function MeuEditalPage() {
     const session = await auth()
@@ -28,8 +28,6 @@ export default async function MeuEditalPage() {
                     <p className="text-muted-foreground">Acompanhe seu progresso ponto a ponto rumo à aprovação.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <DownloadsDialog />
-
                     <form action={async () => {
                         'use server'
                         await seedEditalTopics()

@@ -69,17 +69,20 @@ export default async function EssayDetailPage({ params }: { params: Promise<{ id
             {/* Score Overview */}
             {essay.status === 'CORRECTED' && essay.score !== null && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="bg-slate-900 border-slate-800 text-slate-100 col-span-1 md:col-span-3 lg:col-span-1">
-                        <CardHeader>
-                            <CardTitle className="text-center text-slate-400 uppercase text-xs tracking-widest font-bold">Nota Final</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-col items-center justify-center pt-0 pb-8">
-                            <div className="text-6xl font-black text-yellow-500 mb-2">{essay.score.toFixed(1)}</div>
-                            <div className="text-slate-500 text-sm font-medium">de 100.0 pontos</div>
-                        </CardContent>
-                    </Card>
+                    {/* Only show Score Card if score > 0 */}
+                    {essay.score > 0 && (
+                        <Card className="bg-slate-900 border-slate-800 text-slate-100 col-span-1 md:col-span-3 lg:col-span-1">
+                            <CardHeader>
+                                <CardTitle className="text-center text-slate-400 uppercase text-xs tracking-widest font-bold">Nota Final</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col items-center justify-center pt-0 pb-8">
+                                <div className="text-6xl font-black text-yellow-500 mb-2">{essay.score.toFixed(1)}</div>
+                                <div className="text-slate-500 text-sm font-medium">de 100.0 pontos</div>
+                            </CardContent>
+                        </Card>
+                    )}
 
-                    <Card className="bg-slate-900 border-slate-800 text-slate-100 col-span-1 md:col-span-3 lg:col-span-2">
+                    <Card className={`bg-slate-900 border-slate-800 text-slate-100 col-span-1 md:col-span-3 ${essay.score > 0 ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
                         <CardHeader>
                             <CardTitle className="text-slate-100">Feedback Geral</CardTitle>
                         </CardHeader>

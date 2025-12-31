@@ -18,7 +18,7 @@ export function EssayForm() {
 
     async function handleSubmit(formData: FormData) {
         setIsPending(true)
-        setMessage(null)
+        setMessage("Aguarde alguns segundos, estamos corrigindo sua redação...")
 
         try {
             const result = await submitEssay(undefined, formData)

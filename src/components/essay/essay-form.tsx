@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { submitEssay } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,10 +12,39 @@ import { PenTool, Send, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 export function EssayForm() {
-    const [message, formAction, isPending] = useActionState(submitEssay, undefined)
+    const [isPending, setIsPending] = useState(false)
+    const [message, setMessage] = useState<string | null>(null)
+    const router = useRouter()
+
+    async function handleSubmit(formData: FormData) {
+        setIsPending(true)
+        setMessage(null)
+
+        try {
+            const result = await submitEssay(undefined, formData)
+
+            if (typeof result === 'object' && result?.success && result?.essayId) {
+                setMessage(result.message || "Sucesso!")
+                // Redirect to detail page
+                router.push(`/redacao/${result.essayId}`)
+            } else if (typeof result === 'object' && result?.error) {
+                setMessage(result.error)
+            } else if (typeof result === 'string') {
+                // Fallback for types
+                setMessage(result)
+            } else {
+                setMessage("Erro desconhecido.")
+            }
+        } catch (error) {
+            setMessage("Erro ao enviar.")
+        } finally {
+            setIsPending(false)
+        }
+    }
 
     return (
         <Card className="bg-slate-900 border-slate-800 text-slate-100">
+            {/* Header ... */}
             <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                     <PenTool className="h-5 w-5 text-yellow-500" />
@@ -22,7 +52,8 @@ export function EssayForm() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <form action={formAction} className="space-y-6">
+                <form action={handleSubmit} className="space-y-6">
+                    {/* Inputs ... */}
                     <div className="space-y-2">
                         <Label htmlFor="theme">Tema da Redação</Label>
                         <Input

@@ -127,7 +127,7 @@ async function main() {
     const questionsData = [
         // BLOCO I
         // Ingles (1-8)
-        { q: 1, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'According to the text, criminal organizations use only commercial shipping methods to transport illegal drugs.', ans: 'ERRADO' },
+        { q: 1, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: 'Drug trafficking is a major global issue. Criminal organizations use sophisticated methods to conceal drugs in commercial shipping. No single country can address this problem alone. It requires international cooperation and intelligence sharing. Modern detection technologies help, but traffickers are constantly adapting. Nevertheless, the cost of drug abuse to society, including healthcare and law enforcement, is staggering.', txt: 'According to the text, criminal organizations use only commercial shipping methods to transport illegal drugs.', ans: 'ERRADO' },
         { q: 2, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'The word "sophisticated" in the first paragraph could be replaced by complex without changing the meaning of the sentence.', ans: 'CERTO' },
         { q: 3, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'Maria Santos suggests that fighting drug trafficking requires countries to work together.', ans: 'CERTO' },
         { q: 4, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'In the phrase "No single country can address this problem alone", the word "address" means to speak to.', ans: 'ERRADO' },
@@ -291,6 +291,7 @@ async function main() {
                 data: {
                     subject: q.s as any,
                     topic: q.t,
+                    supportText: (q as any).supportText || undefined,
                     statement: q.txt,
                     correctAnswer: q.ans,
                     difficulty: 'MEDIUM',

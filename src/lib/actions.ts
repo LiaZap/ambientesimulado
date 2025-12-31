@@ -18,6 +18,7 @@ const RegisterSchema = z.object({
 
 const QuestionSchema = z.object({
     statement: z.string().min(5, "Enunciado muito curto"),
+    supportText: z.string().optional(),
     subject: z.string().min(1, "Matéria obrigatória"),
     topic: z.string().min(1, "Tópico obrigatório"),
     difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
@@ -351,6 +352,7 @@ export async function createQuestion(_prevState: string | undefined, formData: F
         await prisma.question.create({
             data: {
                 statement: q.statement,
+                supportText: q.supportText,
                 subject: q.subject as any,
                 topic: q.topic,
                 difficulty: q.difficulty,
@@ -765,7 +767,7 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
                             }
                         })
                         revalidatePath("/redacao")
-                        return "Redação enviada e corrigida pela IA com sucesso!"
+                        return { success: true, message: "Redação enviada e corrigida pela IA com sucesso!", essayId: essay.id }
                     }
                 }
             } catch (webhookError) {
@@ -775,10 +777,10 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
         }
 
         revalidatePath("/redacao")
-        return "Redação enviada com sucesso! Aguarde a correção."
+        return { success: true, message: "Redação enviada com sucesso! Aguarde a correção.", essayId: essay.id }
     } catch (error) {
         console.error(error)
-        return "Erro ao enviar redação."
+        return { error: "Erro ao enviar redação." }
     }
 }
 

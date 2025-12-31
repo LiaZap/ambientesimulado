@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 interface Question {
     id: string
     statement: string
+    supportText?: string | null
     correctAnswer: string
     explanation: string | null
     difficulty: string
@@ -256,6 +257,13 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
 
                         {/* Question Statement */}
                         <div className="flex-1">
+                            {/* Support Text */}
+                            {currentQuestion.supportText && (
+                                <div className="mb-8 p-6 bg-slate-100 border-l-4 border-slate-900 italic text-slate-700 font-serif leading-relaxed text-lg rounded-r-lg">
+                                    {currentQuestion.supportText}
+                                </div>
+                            )}
+
                             <p className="font-serif text-xl leading-loose text-justify text-slate-900 mb-12">
                                 {currentQuestion.statement}
                             </p>

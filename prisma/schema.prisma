@@ -170,6 +170,7 @@ model Question {
   exams       Exam[]   @relation("ExamQuestions")
   subject     Subject
   topic       String
+  supportText String?  @db.Text
   statement   String   
   correctAnswer String // "A", "B", "C", "D", "E" or "CERTO"/"ERRADO" for legacy
   options     Json?    // { A: "...", B: "..." }

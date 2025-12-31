@@ -750,24 +750,27 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
                 })
 
                 if (response.ok) {
-                    const result = await response.json()
+                    const rawResult = await response.json()
+                    const result = Array.isArray(rawResult) ? rawResult[0] : rawResult
 
-                    // Expecting { score: number, feedback: string, suggestions: string, criteria: object }
-                    // Check if result has valid data before updating
-                    if (result && typeof result.score === 'number') {
+                    // Validate if we have at least score OR output/feedback
+                    const score = typeof result.score === 'number' ? result.score : (result.output ? 0 : null)
+                    const feedback = result.feedback || result.output || null
+
+                    if (score !== null || feedback !== null) {
                         await prisma.essay.update({
                             where: { id: essay.id },
                             data: {
                                 status: 'CORRECTED',
-                                score: result.score,
-                                feedback: result.feedback || "Sem feedback detalhado.",
+                                score: score ?? 0,
+                                feedback: feedback || "Sem feedback detalhado.",
                                 suggestions: result.suggestions || "Sem sugestões.",
                                 criteria: result.criteria || {},
                                 correctedAt: new Date()
                             }
                         })
                         revalidatePath("/redacao")
-                        return { success: true, message: "Redação enviada e corrigida pela IA com sucesso!", essayId: essay.id }
+                        return { success: true, message: "Redação corrigida com sucesso!", essayId: essay.id }
                     }
                 }
             } catch (webhookError) {
@@ -781,6 +784,34 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
     } catch (error) {
         console.error(error)
         return { error: "Erro ao enviar redação." }
+    }
+}
+
+export async function deleteEssay(essayId: string) {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Não autorizado" }
+
+    try {
+        const essay = await prisma.essay.findUnique({
+            where: { id: essayId },
+            select: { userId: true }
+        })
+
+        if (!essay) return { error: "Redação não encontrada" }
+
+        if (essay.userId !== session.user.id && session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
+            return { error: "Você não tem permissão para excluir esta redação." }
+        }
+
+        await prisma.essay.delete({
+            where: { id: essayId }
+        })
+
+        revalidatePath("/redacao")
+        return { success: true }
+    } catch (error) {
+        console.error(error)
+        return { error: "Erro ao excluir redação." }
     }
 }
 

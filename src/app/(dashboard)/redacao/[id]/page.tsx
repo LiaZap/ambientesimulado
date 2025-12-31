@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Clock, CheckCircle, AlertTriangle, ChevronLeft, Download } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { DeleteEssayButton } from "@/components/essay/delete-essay-button"
 
 export default async function EssayDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await auth()
@@ -60,6 +61,7 @@ export default async function EssayDetailPage({ params }: { params: Promise<{ id
                                 <AlertTriangle className="h-4 w-4" /> Falha na Correção
                             </Badge>
                         )}
+                        <DeleteEssayButton essayId={essay.id} />
                     </div>
                 </div>
             </div>

@@ -6,10 +6,10 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-// import { Badge } from "@/components/ui/badge" // Removed Badge to use custom "stamp" style
-import { ChevronLeft, ChevronRight, Flag, Plus, Clock, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Flag, Plus, Clock, FileText, Pause, Play, LogOut, LayoutGrid } from "lucide-react"
 import { finishExamAttempt } from "@/lib/actions"
 import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
 
 interface Question {
     id: string
@@ -35,18 +35,20 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
     const [showResult, setShowResult] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [resultData, setResultData] = useState<{ score: number, correct: number, wrong: number, xpEarned: number } | null>(null)
+    const [isPaused, setIsPaused] = useState(false)
+    const [showSidebar, setShowSidebar] = useState(false) // For mobile/toggle
 
     // Timer Logic
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
     useEffect(() => {
-        if (!showResult) {
+        if (!showResult && !isPaused) {
             const timer = setInterval(() => {
                 setElapsedSeconds(prev => prev + 1)
             }, 1000)
             return () => clearInterval(timer)
         }
-    }, [showResult])
+    }, [showResult, isPaused])
 
     const formatTime = (seconds: number) => {
         const h = Math.floor(seconds / 3600)
@@ -74,6 +76,10 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1)
         }
+    }
+
+    const togglePause = () => {
+        setIsPaused(prev => !prev)
     }
 
     const finishExam = async () => {
@@ -121,20 +127,23 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
                         return (
                             <div key={opt}
                                 className={cn(
-                                    "flex items-start space-x-4 p-4 rounded-lg border-2 transition-all cursor-pointer font-serif text-lg",
+                                    "flex items-start space-x-6 p-6 rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
                                     selected
-                                        ? "border-slate-900 bg-slate-100"
-                                        : "border-transparent hover:bg-slate-50"
+                                        ? "border-slate-900 bg-slate-100 shadow-md"
+                                        : "border-slate-200 hover:border-slate-400 hover:bg-white bg-white/50"
                                 )}
                                 onClick={() => handleAnswer(opt)}
                             >
                                 <div className={cn(
-                                    "flex-shrink-0 h-8 w-8 rounded-full border-2 border-slate-900 flex items-center justify-center font-bold text-slate-900",
-                                    selected && "bg-slate-900 text-white"
+                                    "flex-shrink-0 h-10 w-10 rounded-full border-2 flex items-center justify-center font-bold text-lg transition-colors z-10",
+                                    selected ? "bg-slate-900 border-slate-900 text-white" : "border-slate-300 text-slate-500 group-hover:border-slate-900 group-hover:text-slate-900"
                                 )}>
                                     {opt}
                                 </div>
-                                <span className="text-slate-900 flex-1 pt-0.5">{text}</span>
+                                <span className={cn(
+                                    "flex-1 pt-1 text-lg font-medium leading-relaxed z-10 font-serif",
+                                    selected ? "text-slate-900" : "text-slate-700"
+                                )}>{text}</span>
                             </div>
                         )
                     })}
@@ -143,30 +152,30 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
         } else {
             // True/False (Cebraspe) - "Folha de Respostas" Style
             return (
-                <div className="flex justify-center py-8">
+                <div className="flex justify-center py-12">
                     <RadioGroup
                         value={answers[currentQuestion.id] || ''}
                         onValueChange={handleAnswer}
-                        className="flex gap-12"
+                        className="flex gap-16 md:gap-24"
                     >
-                        <div className="flex flex-col items-center gap-3 cursor-pointer group" onClick={() => handleAnswer('CERTO')}>
+                        <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => handleAnswer('CERTO')}>
                             <div className={cn(
-                                "h-8 w-8 rounded-full border-2 border-black flex items-center justify-center transition-all group-hover:scale-110",
-                                answers[currentQuestion.id] === 'CERTO' ? "bg-black" : "bg-white"
+                                "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm group-hover:scale-110",
+                                answers[currentQuestion.id] === 'CERTO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900"
                             )}>
-                                {answers[currentQuestion.id] === 'CERTO' && <div className="h-4 w-4 rounded-full bg-white" />}
+                                {answers[currentQuestion.id] === 'CERTO' && <div className="h-6 w-6 rounded-full bg-white" />}
                             </div>
-                            <Label className="font-serif font-bold text-xl cursor-pointer text-slate-900 tracking-wider">CERTO</Label>
+                            <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Certo</Label>
                         </div>
 
-                        <div className="flex flex-col items-center gap-3 cursor-pointer group" onClick={() => handleAnswer('ERRADO')}>
+                        <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => handleAnswer('ERRADO')}>
                             <div className={cn(
-                                "h-8 w-8 rounded-full border-2 border-black flex items-center justify-center transition-all group-hover:scale-110",
-                                answers[currentQuestion.id] === 'ERRADO' ? "bg-black" : "bg-white"
+                                "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm group-hover:scale-110",
+                                answers[currentQuestion.id] === 'ERRADO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900"
                             )}>
-                                {answers[currentQuestion.id] === 'ERRADO' && <div className="h-4 w-4 rounded-full bg-white" />}
+                                {answers[currentQuestion.id] === 'ERRADO' && <div className="h-6 w-6 rounded-full bg-white" />}
                             </div>
-                            <Label className="font-serif font-bold text-xl cursor-pointer text-slate-900 tracking-wider">ERRADO</Label>
+                            <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Errado</Label>
                         </div>
                     </RadioGroup>
                 </div>
@@ -176,177 +185,262 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
 
     if (showResult && resultData) {
         return (
-            <Card className="bg-white border-slate-200 text-slate-900 max-w-2xl mx-auto animate-in fade-in duration-500 shadow-xl font-serif">
-                <CardHeader className="border-b border-slate-100 pb-8">
-                    <div className="text-center space-y-2">
-                        <div className="mx-auto w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mb-4">
-                            <Flag className="h-8 w-8 text-white" />
-                        </div>
-                        <h2 className="text-3xl font-bold tracking-tight">Resultado Final</h2>
-                        <p className="text-slate-500 font-sans">Simulado Encerrado</p>
-                    </div>
-                </CardHeader>
-                <CardContent className="py-8 space-y-8">
-                    <div className="grid grid-cols-2 gap-8 text-center font-sans">
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <p className="text-sm text-slate-500 uppercase tracking-widest font-bold mb-1">Nota Líquida</p>
-                            <p className="text-5xl font-black text-slate-900">{resultData.score}</p>
-                        </div>
-                        <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                            <p className="text-sm text-yellow-700 uppercase tracking-widest font-bold mb-1">XP Ganho</p>
-                            <div className="flex items-center justify-center gap-2">
-                                <Plus className="h-5 w-5 text-yellow-600" />
-                                <p className="text-5xl font-black text-yellow-600">{resultData.xpEarned}</p>
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+                <Card className="bg-white border-none shadow-2xl max-w-2xl w-full mx-auto animate-in fade-in duration-500">
+                    <CardHeader className="border-b border-slate-100 pb-8 pt-8">
+                        <div className="text-center space-y-4">
+                            <div className="mx-auto w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg transform -translate-y-2">
+                                <Flag className="h-10 w-10 text-slate-900" />
+                            </div>
+                            <div>
+                                <h2 className="text-4xl font-black tracking-tight text-slate-900">Resultado Final</h2>
+                                <p className="text-slate-500 font-medium text-lg mt-2">Simulado Concluído com Sucesso</p>
                             </div>
                         </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent className="py-10 space-y-10">
+                        <div className="grid grid-cols-2 gap-8 text-center font-sans">
+                            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                <p className="text-sm text-slate-500 uppercase tracking-widest font-bold mb-2">Nota Líquida</p>
+                                <p className="text-6xl font-black text-slate-900">{resultData.score}</p>
+                            </div>
+                            <div className="p-6 bg-yellow-50 rounded-2xl border border-yellow-100">
+                                <p className="text-sm text-yellow-700 uppercase tracking-widest font-bold mb-2">XP Ganho</p>
+                                <div className="flex items-center justify-center gap-2">
+                                    <Plus className="h-6 w-6 text-yellow-600" />
+                                    <p className="text-6xl font-black text-yellow-600">{resultData.xpEarned}</p>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="flex justify-between px-8 text-center font-sans">
-                        <div>
-                            <p className="text-2xl font-bold text-green-600">{resultData.correct}</p>
-                            <p className="text-xs font-bold text-slate-400 uppercase">Certas</p>
+                        <div className="flex justify-between px-12 text-center font-sans">
+                            <div>
+                                <p className="text-3xl font-bold text-green-600">{resultData.correct}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase mt-1">Acertos</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-red-600">{resultData.wrong}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase mt-1">Erros</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-slate-400">{totalQuestions - (resultData.correct + resultData.wrong)}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase mt-1">Em Branco</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-2xl font-bold text-red-600">{resultData.wrong}</p>
-                            <p className="text-xs font-bold text-slate-400 uppercase">Erradas</p>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-slate-400">{totalQuestions - (resultData.correct + resultData.wrong)}</p>
-                            <p className="text-xs font-bold text-slate-400 uppercase">Em Branco</p>
-                        </div>
-                    </div>
-                </CardContent>
-                <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 justify-center">
-                    <Button onClick={() => window.location.href = '/simulados'} className="font-sans font-bold bg-slate-900 text-white hover:bg-slate-800">
-                        Voltar para Lista
-                    </Button>
-                </CardFooter>
-            </Card>
+                    </CardContent>
+                    <CardFooter className="bg-slate-50 rounded-b-xl p-8 justify-center">
+                        <Button onClick={() => window.location.href = '/simulados'} className="h-12 px-8 font-bold bg-slate-900 text-white hover:bg-slate-800 text-lg shadow-lg">
+                            Voltar para Meus Simulados
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div>
         )
     }
 
     return (
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 items-start">
-
-            {/* Main Question Paper */}
-            <div className="space-y-6">
-
-                {/* Header Info */}
-                <div className="flex items-center justify-between bg-slate-900 text-white p-4 rounded-lg shadow-lg lg:hidden">
-                    <span className="font-bold flex items-center gap-2"><Clock className="h-4 w-4 text-yellow-500" /> {formatTime(elapsedSeconds)}</span>
-                    <span className="text-sm text-slate-400">{currentIndex + 1}/{totalQuestions}</span>
+        <div className="flex flex-col h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-yellow-200">
+            {/* Top Bar - Minimalist */}
+            <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-12 flex-shrink-0 shadow-sm z-20 relative">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="sm" onClick={() => window.location.href = '/simulados'} className="text-slate-500 hover:text-slate-900">
+                        <ChevronLeft className="h-5 w-5 mr-1" /> Sair
+                    </Button>
+                    <div className="h-6 w-px bg-slate-200 mx-2 hidden sm:block" />
+                    <h1 className="font-bold text-slate-900 text-lg truncate max-w-[200px] sm:max-w-md hidden sm:block" title={title}>
+                        {title}
+                    </h1>
                 </div>
 
-                <div className="relative bg-[#fdfbf7] text-slate-900 shadow-2xl rounded-sm min-h-[600px] flex flex-col print:shadow-none">
-                    {/* Paper Texture/Header */}
-                    <div className="h-2 bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500" />
-
-                    <div className="p-8 md:p-12 flex-1 flex flex-col">
-                        {/* Question Header */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-black pb-4 mb-8 gap-4">
-                            <div>
-                                <h2 className="font-serif font-bold text-2xl uppercase tracking-wide">Questão {currentIndex + 1}</h2>
-                                <p className="font-sans text-xs font-bold text-slate-500 uppercase mt-1 tracking-widest">
-                                    {currentQuestion.subject.replace(/_/g, ' ')} • {currentQuestion.topic}
-                                </p>
-                            </div>
-                            <div className="px-3 py-1 border-2 border-black font-bold font-sans text-xs uppercase">
-                                {currentQuestion.difficulty}
-                            </div>
-                        </div>
-
-                        {/* Question Statement */}
-                        <div className="flex-1">
-                            {/* Support Text */}
-                            {currentQuestion.supportText && (
-                                <div className="mb-8 p-6 bg-slate-100 border-l-4 border-slate-900 italic text-slate-700 font-serif leading-relaxed text-lg rounded-r-lg">
-                                    {currentQuestion.supportText}
-                                </div>
-                            )}
-
-                            <p className="font-serif text-xl leading-loose text-justify text-slate-900 mb-12">
-                                {currentQuestion.statement}
-                            </p>
-
-                            {/* Answer Area */}
-                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                                {renderOptions()}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Footer Navigation */}
-                    <div className="bg-slate-100 p-6 border-t border-slate-200 flex justify-between items-center">
-                        <Button
-                            onClick={handlePrev}
-                            disabled={currentIndex === 0}
-                            variant="ghost"
-                            className="text-slate-600 hover:text-slate-900 hover:bg-slate-200 font-sans"
-                        >
-                            <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
-                        </Button>
-
-                        <div className="hidden md:block text-slate-400 font-serif italic text-sm">
-                            Polícia Rodoviária Federal - Concurso 2025
-                        </div>
-
-                        {currentIndex === totalQuestions - 1 ? (
-                            <Button
-                                onClick={finishExam}
-                                className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 shadow-lg font-sans"
-                            >
-                                <Flag className="mr-2 h-4 w-4" /> Entregar Prova
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleNext}
-                                className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 shadow-lg font-sans"
-                            >
-                                Próxima <ChevronRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Sidebar / Answer Sheet (Gabarito) */}
-            <div className="hidden lg:flex flex-col gap-6 sticky top-6">
-
-                {/* Timer Card */}
-                <Card className="bg-slate-900 border-slate-800 text-white shadow-xl">
-                    <CardContent className="p-6 flex flex-col items-center">
-                        <Label className="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-2">Tempo de Prova</Label>
-                        <div className="text-4xl font-mono font-bold tracking-wider">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3 bg-slate-100 py-1.5 px-4 rounded-full border border-slate-200 shadow-inner">
+                        <Clock className="h-4 w-4 text-slate-500" />
+                        <span className="font-mono font-bold text-slate-700 text-lg tabular-nums">
                             {formatTime(elapsedSeconds)}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Progress / Grid */}
-                <Card className="bg-white border-slate-200 shadow-xl flex-1 max-h-[calc(100vh-250px)] overflow-hidden flex flex-col">
-                    <div className="p-4 bg-slate-50 border-b border-slate-100">
-                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-slate-600" />
-                            Folha de Respostas
-                        </h3>
-                        <Progress value={progress} className="h-1 mt-3" />
-                        <p className="text-xs text-right text-slate-600 font-medium mt-1">{Math.round(progress)}% Concluído</p>
+                        </span>
                     </div>
 
-                    <div className="p-2 overflow-y-auto flex-1 custom-scrollbar">
-                        <div className="grid grid-cols-5 gap-2">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className={cn(
+                            "gap-2 font-bold border-2 transition-all",
+                            isPaused ? "bg-yellow-100 border-yellow-400 text-yellow-700 hover:bg-yellow-200" : "hover:bg-slate-100 hover:border-slate-300"
+                        )}
+                        onClick={togglePause}
+                    >
+                        {isPaused ? <Play className="h-4 w-4 fill-current" /> : <Pause className="h-4 w-4 fill-current" />}
+                        <span className="hidden sm:inline">{isPaused ? "Continuar" : "Pausar"}</span>
+                    </Button>
+
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="lg:hidden"
+                        onClick={() => setShowSidebar(!showSidebar)}
+                    >
+                        <LayoutGrid className="h-5 w-5 text-slate-600" />
+                    </Button>
+                </div>
+            </header>
+
+            {/* Main Content Area */}
+            <div className="flex flex-1 overflow-hidden relative">
+
+                {/* Pause Overlay */}
+                <AnimatePresence>
+                    {isPaused && (
+                        <motion.div
+                            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                            animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
+                            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                            className="absolute inset-0 z-50 bg-slate-900/30 flex items-center justify-center p-4"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-6"
+                            >
+                                <div className="mx-auto w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <Pause className="h-8 w-8 text-yellow-600 fill-current" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-slate-900">Simulado Pausado</h3>
+                                    <p className="text-slate-500 mt-2">O cronômetro está parado. Respire fundo e continue quando estiver pronto!</p>
+                                </div>
+                                <Button size="lg" className="w-full font-bold text-lg bg-slate-900 text-white hover:bg-slate-800" onClick={togglePause}>
+                                    <Play className="h-5 w-5 mr-2 fill-current" /> Retornar à Prova
+                                </Button>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Question Area */}
+                <main className={cn(
+                    "flex-1 overflow-y-auto p-4 md:p-8 transition-all duration-300",
+                    isPaused && "opacity-0 pointer-events-none" // Hide content visually too if blur isn't enough, but blur is better for UX
+                )}>
+                    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+                        {/* Progress Bar */}
+                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${progress}%` }} />
+                        </div>
+
+                        {/* Question Card */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[600px] flex flex-col">
+                            {/* Question Header */}
+                            <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="font-serif font-bold text-2xl text-slate-900 flex items-center gap-3">
+                                        <span className="bg-slate-900 text-white px-3 py-1 rounded text-base font-sans">Q{currentIndex + 1}</span>
+                                        <span className="text-slate-400 text-lg font-sans font-medium">/ {totalQuestions}</span>
+                                    </h2>
+                                </div>
+                                <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
+                                    <span className="px-3 py-1 bg-white border border-slate-200 rounded text-slate-600">{currentQuestion.subject.replace(/_/g, ' ')}</span>
+                                    <span className="px-3 py-1 bg-white border border-slate-200 rounded text-slate-600">{currentQuestion.topic}</span>
+                                    <span className={cn(
+                                        "px-3 py-1 rounded border",
+                                        currentQuestion.difficulty === 'EASY' ? "bg-green-50 text-green-700 border-green-200" :
+                                            currentQuestion.difficulty === 'MEDIUM' ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                                                "bg-red-50 text-red-700 border-red-200"
+                                    )}>
+                                        {currentQuestion.difficulty}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="p-8 md:p-12 flex-1 flex flex-col gap-10">
+                                {/* Support Text */}
+                                {currentQuestion.supportText && (
+                                    <div className="p-8 bg-[#fffdf5] border-l-4 border-yellow-400 rounded-r-lg">
+                                        <p className="font-serif text-lg leading-loose text-slate-800 italic">
+                                            {currentQuestion.supportText}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Statement */}
+                                <div className="prose prose-slate max-w-none">
+                                    <p className="font-serif text-2xl leading-loose text-slate-900 text-justify">
+                                        {currentQuestion.statement}
+                                    </p>
+                                </div>
+
+                                {/* Divider */}
+                                <div className="h-px bg-slate-100 w-full" />
+
+                                {/* Answers */}
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    {renderOptions()}
+                                </div>
+                            </div>
+
+                            {/* Footer Navigation within Card */}
+                            <div className="bg-slate-50 px-8 py-6 border-t border-slate-100 flex justify-between items-center">
+                                <Button
+                                    onClick={handlePrev}
+                                    disabled={currentIndex === 0}
+                                    variant="outline"
+                                    className="border-slate-300 text-slate-600 hover:text-slate-900 hover:border-slate-400 font-bold px-6"
+                                >
+                                    <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
+                                </Button>
+
+                                {currentIndex === totalQuestions - 1 ? (
+                                    <Button
+                                        onClick={finishExam}
+                                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 shadow-lg shadow-green-600/20 text-lg h-12"
+                                    >
+                                        <Flag className="mr-2 h-5 w-5" /> Entregar Prova
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleNext}
+                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 shadow-lg shadow-slate-900/20 text-lg h-12"
+                                    >
+                                        Próxima <ChevronRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                {/* Right Panel - Question Navigation (Gabarito) */}
+                <aside className={cn(
+                    "w-80 bg-white border-l border-slate-200 flex-col absolute inset-y-0 right-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 shadow-xl lg:shadow-none lg:flex",
+                    showSidebar ? "translate-x-0 flex" : "translate-x-full hidden"
+                )}>
+                    <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                            <LayoutGrid className="h-5 w-5 text-slate-500" />
+                            Navegação
+                        </h3>
+                        <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setShowSidebar(false)}>
+                            <ChevronRight className="h-5 w-5" />
+                        </Button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        <div className="grid grid-cols-5 gap-3">
                             {questions.map((q, idx) => {
                                 const isAnswered = answers[q.id]
                                 const isCurrent = currentIndex === idx
                                 return (
                                     <button
                                         key={q.id}
-                                        onClick={() => setCurrentIndex(idx)}
+                                        onClick={() => {
+                                            setCurrentIndex(idx)
+                                            setShowSidebar(false) // Close on mobile selection
+                                        }}
                                         className={cn(
-                                            "h-10 w-10 text-xs font-bold rounded-lg border flex items-center justify-center transition-all",
-                                            isCurrent ? "border-slate-900 bg-slate-900 text-white ring-2 ring-yellow-500 ring-offset-2" :
-                                                isAnswered ? "bg-slate-200 border-slate-400 text-slate-950 font-black" :
-                                                    "border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900 bg-white"
+                                            "aspect-square rounded-lg flex items-center justify-center text-sm font-bold transition-all border-2",
+                                            isCurrent ? "border-slate-900 bg-slate-900 text-white shadow-md scale-105 ring-2 ring-yellow-400 ring-offset-2" :
+                                                isAnswered ? "bg-slate-100 border-slate-300 text-slate-600" :
+                                                    "border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600 bg-white"
                                         )}
                                     >
                                         {idx + 1}
@@ -355,9 +449,18 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
                             })}
                         </div>
                     </div>
-                </Card>
-            </div>
 
+                    <div className="p-6 bg-slate-50 border-t border-slate-100">
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">Respondidas</span>
+                                <span className="font-bold text-slate-900">{answeredCount}/{totalQuestions}</span>
+                            </div>
+                            <Progress value={progress} className="h-2 rounded-full bg-slate-200" />
+                        </div>
+                    </div>
+                </aside>
+            </div>
         </div>
     )
 }

@@ -867,8 +867,18 @@ export async function chatWithAI(message: string) {
             return { error: "Erro na comunicação com a IA." }
         }
 
-        const data = await response.json()
-        return { success: true, response: data.response || "Sem resposta da IA." }
+        const rawResult = await response.json()
+        const result = Array.isArray(rawResult) ? rawResult[0] : rawResult
+
+        // Robust check for various possible response keys
+        const textResponse = result.output || result.response || result.text || result.message
+
+        if (!textResponse) {
+            console.error("Format unexpected from AI:", rawResult)
+            return { error: "Formato de resposta da IA inválido." }
+        }
+
+        return { success: true, response: textResponse }
 
     } catch (error) {
         console.error("Chat AI Error:", error)

@@ -8,6 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { chatWithAI } from "@/lib/actions"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export function ChatInterface() {
     const [messages, setMessages] = useState([
@@ -63,20 +65,30 @@ export function ChatInterface() {
                     {messages.map((msg, i) => (
                         <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {msg.role === 'assistant' && (
-                                <Avatar className="h-8 w-8 border border-yellow-500/50">
+                                <Avatar className="h-8 w-8 border border-yellow-500/50 mt-1">
                                     <AvatarFallback className="bg-yellow-500/10 text-yellow-500"><Bot className="h-4 w-4" /></AvatarFallback>
                                 </Avatar>
                             )}
 
-                            <div className={`rounded-lg p-3 max-w-[80%] text-sm ${msg.role === 'user'
-                                ? 'bg-yellow-500 text-slate-950 font-medium'
-                                : 'bg-slate-900 text-slate-200 border border-slate-800'
+                            <div className={`rounded-2xl p-4 max-w-[85%] text-sm shadow-sm ${msg.role === 'user'
+                                ? 'bg-yellow-500 text-slate-950 font-medium rounded-tr-none'
+                                : 'bg-slate-900 text-slate-200 border border-slate-800 rounded-tl-none'
                                 }`}>
-                                {msg.content}
+                                {msg.role === 'assistant' ? (
+                                    <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800 prose-headings:font-bold prose-headings:text-yellow-500 prose-a:text-yellow-400 table-auto prose-td:border prose-td:border-slate-700 prose-th:border prose-th:border-slate-700 prose-th:bg-slate-800 prose-th:p-2 prose-td:p-2">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                )}
                             </div>
 
                             {msg.role === 'user' && (
-                                <Avatar className="h-8 w-8 border border-slate-700">
+                                <Avatar className="h-8 w-8 border border-slate-700 mt-1">
                                     <AvatarFallback className="bg-slate-800 text-slate-400"><User className="h-4 w-4" /></AvatarFallback>
                                 </Avatar>
                             )}
@@ -88,7 +100,11 @@ export function ChatInterface() {
                                 <AvatarFallback className="bg-yellow-500/10 text-yellow-500"><Bot className="h-4 w-4" /></AvatarFallback>
                             </Avatar>
                             <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 text-sm text-slate-400">
-                                <span className="animate-pulse">Digitando...</span>
+                                <span className="animate-pulse flex gap-1">
+                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </span>
                             </div>
                         </div>
                     )}

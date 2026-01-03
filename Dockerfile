@@ -80,4 +80,4 @@ ENV HOSTNAME="0.0.0.0"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["/bin/sh", "-c", "prisma db push --accept-data-loss && node server.js"]
+CMD ["/bin/sh", "-c", "prisma db push --accept-data-loss --skip-generate && node server.js"]

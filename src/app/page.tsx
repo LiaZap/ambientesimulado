@@ -70,26 +70,18 @@ export default function LandingPage() {
             <div className="relative hidden lg:block">
               {/* Abstract Visual Representation of 'Organization' */}
               {/* VSL Video Section */}
-              <div className="relative z-10 group cursor-pointer">
+              {/* VSL Video Section */}
+              <div className="relative z-10 group">
                 {/* Video Container */}
                 <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 aspect-video group-hover:shadow-yellow-500/20 transition-all duration-300 transform group-hover:-translate-y-1">
-
-                  {/* Thumbnail / Video Placeholder */}
-                  <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
-                    {/* You can replace this with an actual video tag or iframe later */}
-                    <div className="absolute inset-0 bg-[url('/prf-officer.png')] bg-cover bg-center opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent" />
-
-                    {/* Play Button */}
-                    <div className="relative z-20 h-20 w-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <div className="h-0 w-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-slate-950 border-b-[12px] border-b-transparent ml-1" />
-                    </div>
-                  </div>
-
-                  {/* Progress Bar (Fake) */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800">
-                    <div className="h-full w-1/3 bg-red-600" />
-                  </div>
+                  <iframe
+                    className="w-full h-full"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"
+                    title="Vídeo de Apresentação"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
                 </div>
 
                 {/* Video Caption */}

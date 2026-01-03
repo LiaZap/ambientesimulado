@@ -6,8 +6,17 @@ import { prisma } from "@/lib/db"
 export const dynamic = "force-dynamic"
 
 export default async function LandingPage() {
-  const config = await prisma.systemConfig.findFirst()
-  const videoUrl = config?.landingPageVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"
+  let videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"
+
+  try {
+    const config = await prisma.systemConfig.findFirst()
+    if (config?.landingPageVideoUrl) {
+      videoUrl = config.landingPageVideoUrl
+    }
+  } catch (error) {
+    console.error("Failed to load system config:", error)
+    // Fallback is already set
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-yellow-500/30">

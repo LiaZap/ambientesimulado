@@ -69,34 +69,41 @@ export default function LandingPage() {
 
             <div className="relative hidden lg:block">
               {/* Abstract Visual Representation of 'Organization' */}
-              <div className="relative z-10 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-yellow-500 flex items-center justify-center font-bold text-slate-950">EU</div>
-                    <div>
-                      <p className="font-bold text-white">Futuro PRF</p>
-                      <p className="text-xs text-green-500">Online e Estudando</p>
+              {/* VSL Video Section */}
+              <div className="relative z-10 group cursor-pointer">
+                {/* Video Container */}
+                <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 aspect-video group-hover:shadow-yellow-500/20 transition-all duration-300 transform group-hover:-translate-y-1">
+
+                  {/* Thumbnail / Video Placeholder */}
+                  <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+                    {/* You can replace this with an actual video tag or iframe later */}
+                    <div className="absolute inset-0 bg-[url('/prf-officer.png')] bg-cover bg-center opacity-50" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent" />
+
+                    {/* Play Button */}
+                    <div className="relative z-20 h-20 w-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <div className="h-0 w-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-slate-950 border-b-[12px] border-b-transparent ml-1" />
                     </div>
                   </div>
-                  <Trophy className="text-yellow-500 h-6 w-6" />
-                </div>
-                <div className="space-y-3">
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center gap-3">
-                    <CheckCircle2 className="text-green-500 h-5 w-5" />
-                    <span className="text-slate-300">Meta do dia: Direito Penal</span>
-                  </div>
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center gap-3">
-                    <CheckCircle2 className="text-green-500 h-5 w-5" />
-                    <span className="text-slate-300">Redação enviada (IA Corrigindo...)</span>
-                  </div>
-                  <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-800 flex items-center gap-3 opacity-50">
-                    <div className="h-5 w-5 rounded-full border-2 border-slate-600" />
-                    <span className="text-slate-500">Revisão de Trânsito</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-yellow-500/20 blur-[100px] -z-10" />
+                  {/* Progress Bar (Fake) */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800">
+                    <div className="h-full w-1/3 bg-red-600" />
+                  </div>
+                </div>
+
+                {/* Video Caption */}
+                <div className="mt-4 text-center">
+                  <p className="text-sm font-medium text-slate-400">
+                    <span className="text-red-500 font-bold animate-pulse mr-2">● AO VIVO</span>
+                    Veja como ser aprovado na PRF em 2025
+                  </p>
+                </div>
+
+                {/* Decorative Elements */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -z-10" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -z-10" />
+              </div>
             </div>
           </div>
         </section>
@@ -211,7 +218,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="bg-slate-950 relative h-64 md:h-auto overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554752026-626a5d1b7482?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-luminosity" />
+                <div className="absolute inset-0 bg-[url('/prf-officer.png')] bg-cover bg-center opacity-40 mix-blend-luminosity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="bg-slate-900/80 backdrop-blur-sm p-4 rounded-xl border border-slate-700">

@@ -35,7 +35,11 @@ model User {
   twoFactorSecret   String?  // encrypted
   twoFactorEnabled  Boolean  @default(false)
   currentSessionId  String?
+  credits           Int      @default(0) // Credits for essays/planning
   
+  creditTransactions CreditTransaction[]
+  usageLogs         UsageLog[]
+
   @@index([email])
   @@index([subscriptionId])
 }
@@ -44,9 +48,13 @@ model Subscription {
   id                String   @id @default(cuid())
   userId            String   @unique
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeCustomerId  String   @unique
-  stripeSubscriptionId String @unique
-  stripePriceId     String
+  
+  // Generic Provider Config
+  provider          String   @default("KIWIFY") // "KIWIFY", "STRIPE"
+  externalId        String?  // Subscription ID in Kiwify/Stripe
+  planId            String?
+  plan              Plan?    @relation(fields: [planId], references: [id])
+  
   status            SubscriptionStatus // ACTIVE, CANCELED, PAST_DUE
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
@@ -56,6 +64,46 @@ model Subscription {
   
   @@index([userId])
   @@index([status])
+  @@index([externalId])
+}
+
+model Plan {
+  id              String   @id @default(cuid())
+  name            String   // "Mensal", "Anual"
+  description     String?
+  price           Float
+  interval        String   // "month", "year"
+  credits         Int      // Grants this many credits per renewal
+  features        String[]
+  kiwifyProductId String?  // Link to Kiwify
+  isActive        Boolean  @default(true)
+  maxExamsPerWeek Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  subscriptions   Subscription[]
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int      // +/- value
+  type        String   // "PURCHASE", "USAGE", "RENEWAL", "ADMIN"
+  description String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model UsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // "START_EXAM"
+  metadata  Json?
+  createdAt DateTime @default(now())
+  
+  @@index([userId, action, createdAt])
 }
 
 model Profile {

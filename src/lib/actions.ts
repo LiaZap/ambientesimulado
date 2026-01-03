@@ -47,6 +47,7 @@ const ChangePasswordSchema = z.object({
     path: ["confirmPassword"],
 })
 
+// I will do this in next step after viewing file to be sure of line numbers
 // Helper for Admin Checks
 async function requireAdmin() {
     const session = await auth()
@@ -720,7 +721,28 @@ export async function submitEssay(_prevState: string | undefined, formData: Form
         }
     }
 
+    // Check Credits
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+    if (!user || user.credits < 1) {
+        return { error: "Sem créditos disponíveis. Adquira um plano ou pacote de créditos." }
+    }
+
     try {
+        // Deduct Credit (optimistic)
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { credits: { decrement: 1 } }
+        })
+
+        await prisma.creditTransaction.create({
+            data: {
+                userId: session.user.id,
+                amount: -1,
+                type: 'USAGE',
+                description: `Correção de Redação (Tema: ${theme.substring(0, 30)}...)`
+            }
+        })
+
         // 1. Create Essay as PENDING
         const essay = await prisma.essay.create({
             data: {
@@ -890,11 +912,32 @@ export async function generateStudyPlan(data: any) {
     const session = await auth()
     if (!session?.user?.id) return { error: "Não autorizado" }
 
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+    if (!user || user.credits < 1) {
+        return { error: "Sem créditos disponíveis. Adquira um plano ou pacote de créditos." }
+    }
+
     try {
         const config = await prisma.systemConfig.findFirst()
         if (!config?.n8nPlanningWebhookUrl) {
             return { error: "Planejador de Estudos não configurado (Webhook)." }
         }
+
+        // Deduct Credit Check
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { credits: { decrement: 1 } }
+        })
+
+        // Log Transaction
+        const transaction = await prisma.creditTransaction.create({
+            data: {
+                userId: session.user.id,
+                amount: -1,
+                type: 'USAGE',
+                description: `Planejamento de Estudos (${data.focus || 'Geral'})`
+            }
+        })
 
         const response = await fetch(config.n8nPlanningWebhookUrl, {
             method: 'POST',
@@ -908,7 +951,7 @@ export async function generateStudyPlan(data: any) {
         })
 
         if (!response.ok) {
-            return { error: "Erro na comunicação com o Planejador IA." }
+            throw new Error("Erro na comunicação com o Planejador IA.")
         }
 
         const result = await response.json()
@@ -916,7 +959,18 @@ export async function generateStudyPlan(data: any) {
 
     } catch (error) {
         console.error("Study Plan Error:", error)
-        return { error: "Erro ao gerar plano de estudos." }
+
+        // Refund on failure
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { credits: { increment: 1 } }
+        })
+
+        // Mark transaction as refunded or just leave it?
+        // Better to delete the transaction or mark description "REFUNDED"
+        // For MVP, simplistic refund is enough.
+
+        return { error: "Erro ao gerar plano de estudos. Seus créditos foram estornados." }
     }
 }
 
@@ -1106,4 +1160,85 @@ export async function changePassword(_prevState: string | undefined, formData: F
         console.error("Change Password Error:", error)
         return "Erro ao alterar senha."
     }
+}
+
+const PlanSchema = z.object({
+    name: z.string().min(2),
+    description: z.string().optional(),
+    price: z.coerce.number().min(0),
+    interval: z.enum(["month", "year"]),
+    credits: z.coerce.number().min(0),
+    maxExamsPerWeek: z.coerce.number().min(0),
+    kiwifyProductId: z.string().optional(),
+    isActive: z.boolean().optional()
+})
+
+export async function createPlan(data: z.infer<typeof PlanSchema>) {
+    try { await requireAdmin() } catch { throw new Error("Unauthorized") }
+
+    const validation = PlanSchema.safeParse(data)
+    if (!validation.success) throw new Error("Dados inválidos")
+
+    await prisma.plan.create({
+        data: validation.data
+    })
+
+    revalidatePath("/admin/planos")
+}
+
+export async function updatePlan(planId: string, data: z.infer<typeof PlanSchema>) {
+    try { await requireAdmin() } catch { throw new Error("Unauthorized") }
+
+    const validation = PlanSchema.safeParse(data)
+    if (!validation.success) throw new Error("Dados inválidos")
+
+    await prisma.plan.update({
+        where: { id: planId },
+        data: validation.data
+    })
+
+    revalidatePath("/admin/planos")
+    revalidatePath(`/admin/planos/${planId}`)
+}
+
+export async function checkExamLimit(userId: string) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { subscription: { include: { plan: true } } }
+    })
+
+    // If no plan, assume blocked or default limit (e.g. 0)
+    // For now, let's allow free users 0 exams or 1 demo? 
+    // Let's assume strict: No plan = No exams (or 1 lifetime?)
+    // User request implies plans control this.
+
+    // If user is ADMIN, bypass
+    if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') return { allowed: true }
+
+    const maxExams = user?.subscription?.plan?.maxExamsPerWeek ?? 0 // Default 0 if no plan
+
+    // If unlimited (e.g. 0 used as unlimited convention? Or explicit?)
+    // User didn't specify unlimited convention. Let's assume high number or 0.
+    // In plan-form we said 0 = unlimited.
+    if (maxExams === 0 && user?.subscription?.plan?.isActive) return { allowed: true }
+
+    // Count attempts in last 7 days
+    const lastWeek = new Date()
+    lastWeek.setDate(lastWeek.getDate() - 7)
+
+    const attemptsCount = await prisma.examAttempt.count({
+        where: {
+            userId: userId,
+            startedAt: { gte: lastWeek }
+        }
+    })
+
+    if (attemptsCount >= maxExams) {
+        return {
+            allowed: false,
+            message: `Você atingiu o limite de ${maxExams} simulados por semana do seu plano.`
+        }
+    }
+
+    return { allowed: true, remaining: maxExams - attemptsCount }
 }

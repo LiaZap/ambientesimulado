@@ -11,7 +11,8 @@ import {
     Settings,
     LogOut,
     Shield,
-    ClipboardList
+    ClipboardList,
+    CreditCard
 } from "lucide-react"
 import { logout } from "@/lib/actions"
 
@@ -20,6 +21,7 @@ const routes = [
     { label: "Gerenciar Cursos", icon: BookOpen, href: "/admin/cursos" },
     { label: "Banco de Questões", icon: FileText, href: "/admin/questoes" },
     { label: "Simulados", icon: ClipboardList, href: "/admin/simulados" },
+    { label: "Planos & Créditos", icon: CreditCard, href: "/admin/planos" },
     { label: "Usuários", icon: Users, href: "/admin/usuarios" },
     { label: "Configurações", icon: Settings, href: "/admin/config" },
 ]

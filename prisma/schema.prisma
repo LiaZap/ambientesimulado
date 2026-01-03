@@ -397,6 +397,7 @@ model SystemConfig {
   n8nWebhookUrl   String? // For Essay Correction
   n8nAssistantWebhookUrl String? // For AI Chat/Assistant
   n8nPlanningWebhookUrl String? // For Study Planning
+  landingPageVideoUrl String? // Youtube/Vimeo/Mp4 URL for Landing Page VSL
   siteName        String   @default("PRF Ambiente Simulado")
   maintenanceMode Boolean  @default(false)
   xpPerLesson     Int      @default(50)

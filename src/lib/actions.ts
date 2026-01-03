@@ -632,7 +632,7 @@ export async function getSystemConfig() {
     return config
 }
 
-export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, n8nPlanningWebhookUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
+export async function updateSystemConfig(data: { n8nWebhookUrl?: string, n8nAssistantWebhookUrl?: string, n8nPlanningWebhookUrl?: string, landingPageVideoUrl?: string, siteName?: string, maintenanceMode?: boolean, xpPerLesson?: number, xpBaseExam?: number }) {
     try {
         await requireAdmin()
 

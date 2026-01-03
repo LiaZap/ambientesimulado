@@ -23,8 +23,9 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
     const [maintenance, setMaintenance] = useState(initialConfig?.maintenanceMode || false)
     const [xpLesson, setXpLesson] = useState(initialConfig?.xpPerLesson || 50)
     const [xpExam, setXpExam] = useState(initialConfig?.xpBaseExam || 20)
+    const [videoUrl, setVideoUrl] = useState(initialConfig?.landingPageVideoUrl || "")
 
-    const handleSave = async (section: 'general' | 'gamification' | 'integration') => {
+    const handleSave = async (section: 'general' | 'gamification' | 'integration' | 'landing') => {
         setIsLoading(true)
         try {
             const data: any = {}
@@ -38,6 +39,8 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                 data.n8nWebhookUrl = webhookUrl
                 data.n8nAssistantWebhookUrl = assistantWebhookUrl
                 data.n8nPlanningWebhookUrl = planningWebhookUrl
+            } else if (section === 'landing') {
+                data.landingPageVideoUrl = videoUrl
             }
 
             const result = await updateSystemConfig(data)
@@ -100,6 +103,37 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                         >
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                             Salvar Alterações
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Landing Page Settings */}
+                <Card className="bg-slate-900 border-slate-800">
+                    <CardHeader>
+                        <CardTitle className="text-xl text-slate-200">Landing Page (Vídeo)</CardTitle>
+                        <CardDescription className="text-slate-400">Configure o vídeo de apresentação (Youtube/Vimeo).</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="videoUrl" className="text-slate-300">URL do Vídeo (Embed ou Link)</Label>
+                            <Input
+                                id="videoUrl"
+                                value={videoUrl}
+                                onChange={(e) => setVideoUrl(e.target.value)}
+                                placeholder="https://www.youtube.com/embed/..."
+                                className="bg-slate-950 border-slate-800 text-white"
+                            />
+                            <p className="text-xs text-slate-500">Recomendado usar link de embed do Youtube ou Vimeo.</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                            onClick={() => handleSave('landing')}
+                            disabled={isLoading}
+                            className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
+                        >
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Salvar Vídeo
                         </Button>
                     </CardFooter>
                 </Card>

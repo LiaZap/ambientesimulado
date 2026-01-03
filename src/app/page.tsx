@@ -1,8 +1,12 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, XCircle, ArrowRight, ShieldCheck, Target, Zap, BookOpen, Trophy } from "lucide-react"
+import { prisma } from "@/lib/db"
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const config = await prisma.systemConfig.findFirst()
+  const videoUrl = config?.landingPageVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-yellow-500/30">
 
@@ -76,7 +80,7 @@ export default function LandingPage() {
                 <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 aspect-video group-hover:shadow-yellow-500/20 transition-all duration-300 transform group-hover:-translate-y-1">
                   <iframe
                     className="w-full h-full"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"
+                    src={videoUrl}
                     title="Vídeo de Apresentação"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

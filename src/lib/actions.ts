@@ -1242,3 +1242,122 @@ export async function checkExamLimit(userId: string) {
 
     return { allowed: true, remaining: maxExams - attemptsCount }
 }
+
+// ... existing code ...
+
+// User Management Actions
+
+const CreateUserSchema = z.object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    role: z.enum(["USER", "PREMIUM", "ADMIN", "SUPER_ADMIN"]),
+    credits: z.coerce.number().min(0).default(0),
+})
+
+const UpdateUserSchema = z.object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    password: z.string().optional(), // Optional for update
+    role: z.enum(["USER", "PREMIUM", "ADMIN", "SUPER_ADMIN"]),
+    credits: z.coerce.number().min(0).default(0),
+})
+
+export async function createUser(_prevState: string | undefined, formData: FormData) {
+    try { await requireAdmin() } catch { return "Não autorizado" }
+
+    const data = Object.fromEntries(formData)
+    const validation = CreateUserSchema.safeParse(data)
+
+    if (!validation.success) {
+        return "Dados inválidos: " + validation.error.issues.map(i => i.message).join(", ")
+    }
+
+    const { name, email, password, role, credits } = validation.data
+
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { email } })
+        if (existingUser) return "Email já cadastrado."
+
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: role as any,
+                credits,
+                profile: { create: {} }
+            }
+        })
+        revalidatePath("/admin/usuarios")
+        return "Usuário criado com sucesso!"
+    } catch (error) {
+        console.error(error)
+        return "Erro ao criar usuário."
+    }
+}
+
+export async function updateUser(userId: string, _prevState: string | undefined, formData: FormData) {
+    try { await requireAdmin() } catch { return "Não autorizado" }
+
+    const data = Object.fromEntries(formData)
+    const validation = UpdateUserSchema.safeParse(data)
+
+    if (!validation.success) {
+        return "Dados inválidos: " + validation.error.issues.map(i => i.message).join(", ")
+    }
+
+    const { name, email, password, role, credits } = validation.data
+
+    try {
+        const updateData: any = {
+            name,
+            email,
+            role: role as any,
+            credits
+        }
+
+        if (password && password.trim() !== "") {
+            if (password.length < 6) return "Senha deve ter pelo menos 6 caracteres."
+            updateData.password = await bcrypt.hash(password, 10)
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: updateData
+        })
+        revalidatePath("/admin/usuarios")
+        revalidatePath(`/admin/usuarios/${userId}`)
+        return "Usuário atualizado com sucesso!"
+    } catch (error) {
+        console.error(error)
+        return "Erro ao atualizar usuário."
+    }
+}
+
+export async function deleteUser(userId: string) {
+    const session = await auth()
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return { error: "Não autorizado" }
+
+    if (userId === session.user.id) return { error: "Você não pode se excluir." }
+
+    try {
+        await prisma.user.delete({ where: { id: userId } })
+        revalidatePath("/admin/usuarios")
+        return { success: true }
+    } catch (_error) {
+        return { error: "Erro ao excluir usuário" }
+    }
+}
+
+export async function getUser(userId: string) {
+    const session = await auth()
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return null
+
+    return await prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true }
+    })
+}

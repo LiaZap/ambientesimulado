@@ -96,7 +96,7 @@ export default function LandingPage() {
                 <div className="mt-4 text-center">
                   <p className="text-sm font-medium text-slate-400">
                     <span className="text-red-500 font-bold animate-pulse mr-2">● AO VIVO</span>
-                    Veja como ser aprovado na PRF em 2025
+                    Veja como ser aprovado na PRF em 2026
                   </p>
                 </div>
 
@@ -269,7 +269,7 @@ export default function LandingPage() {
             </div>
 
             <div className="text-sm text-slate-500">
-              &copy; 2025 Solitary Eclipse. <br /> Todos os direitos reservados.
+              &copy; 2026 Solitary Eclipse. <br /> Todos os direitos reservados.
             </div>
           </div>
         </footer>

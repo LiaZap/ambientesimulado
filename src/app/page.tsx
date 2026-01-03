@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, XCircle, ArrowRight, ShieldCheck, Target, Zap, BookOpen, Trophy } from "lucide-react"
 import { prisma } from "@/lib/db"
+import { getEmbedUrl } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -11,7 +12,7 @@ export default async function LandingPage() {
   try {
     const config = await prisma.systemConfig.findFirst()
     if (config?.landingPageVideoUrl) {
-      videoUrl = config.landingPageVideoUrl
+      videoUrl = getEmbedUrl(config.landingPageVideoUrl)
     }
   } catch (error) {
     console.error("Failed to load system config:", error)

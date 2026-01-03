@@ -78,6 +78,12 @@ export default async function SimuladosPage() {
                                         Gabarito
                                     </Button>
                                 </Link>
+                                <Link href={`/simulados/${exam.id}/redacao`} target="_blank" className="col-span-2 w-full">
+                                    <Button variant="outline" className="w-full border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
+                                        <FileText className="w-4 h-4 mr-2" />
+                                        Folha de Redação
+                                    </Button>
+                                </Link>
                             </div>
                         </CardFooter>
                     </Card>

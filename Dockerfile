@@ -68,6 +68,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 RUN apk add --no-cache openssl
 RUN npm install -g tsx
 RUN npm install bcryptjs
+RUN npm install -g prisma
 
 USER nextjs
 
@@ -79,4 +80,4 @@ ENV HOSTNAME="0.0.0.0"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "server.js"]
+CMD ["/bin/sh", "-c", "prisma db push --accept-data-loss && node server.js"]

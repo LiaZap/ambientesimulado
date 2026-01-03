@@ -68,7 +68,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 RUN apk add --no-cache openssl
 RUN npm install -g tsx
 RUN npm install bcryptjs
-RUN npm install -g prisma
+RUN npm install -g prisma@5.22.0
 
 USER nextjs
 

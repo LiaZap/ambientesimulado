@@ -3,12 +3,13 @@ import { ExamInterface } from "@/components/exam/exam-interface"
 import { notFound } from "next/navigation"
 
 interface ExamPageProps {
-    params: {
+    params: Promise<{
         examId: string
-    }
+    }>
 }
 
-export default async function ExamPage({ params }: ExamPageProps) {
+export default async function ExamPage(props: ExamPageProps) {
+    const params = await props.params
     const exam = await getExam(params.examId)
 
     if (!exam) {

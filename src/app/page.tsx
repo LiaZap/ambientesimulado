@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, XCircle, ArrowRight, ShieldCheck, Target, Zap, BookOpen, Trophy } from "lucide-react"
 import { prisma } from "@/lib/db"
 
+export const dynamic = "force-dynamic"
+
 export default async function LandingPage() {
   const config = await prisma.systemConfig.findFirst()
   const videoUrl = config?.landingPageVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ?si=adS8vU7ZgC_8jXy2"

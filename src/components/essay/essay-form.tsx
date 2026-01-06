@@ -11,7 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { PenTool, Send, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-export function EssayForm() {
+interface EssayFormProps {
+    initialTheme?: string
+    examId?: string
+}
+
+export function EssayForm({ initialTheme, examId }: EssayFormProps) {
     const [isPending, setIsPending] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
     const router = useRouter()
@@ -21,6 +26,11 @@ export function EssayForm() {
         setMessage("Aguarde alguns segundos, estamos corrigindo sua redação...")
 
         try {
+            // Include examId if present (though action might not use it yet, helps consistency)
+            if (examId) {
+                formData.append('examId', examId)
+            }
+
             const result = await submitEssay(undefined, formData)
 
             if (typeof result === 'object' && result?.success && result?.essayId) {
@@ -59,6 +69,7 @@ export function EssayForm() {
                         <Input
                             id="theme"
                             name="theme"
+                            defaultValue={initialTheme}
                             placeholder="Ex: A importância da PRF na segurança viária..."
                             required
                             className="bg-slate-950 border-slate-800 focus:ring-yellow-500"

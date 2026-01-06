@@ -124,21 +124,26 @@ async function main() {
     }
 
     // --- QUESTIONS DATA (Extracted from 2025-3 Script) ---
+    // Texts
+    const textEnglish = 'Drug trafficking is a major global issue. Criminal organizations use sophisticated methods to conceal drugs in commercial shipping. No single country can address this problem alone. It requires international cooperation and intelligence sharing. Modern detection technologies help, but traffickers are constantly adapting. Nevertheless, the cost of drug abuse to society, including healthcare and law enforcement, is staggering.'
+
+    const textPortugues = `Texto 1A18-I\n\nA segurança viária constitui um dos pilares fundamentais para o desenvolvimento social e econômico de qualquer nação. No Brasil, os números relacionados a acidentes de trânsito revelam uma realidade preocupante: milhares de vidas são perdidas anualmente nas rodovias federais, estaduais e municipais, gerando não apenas tragédias familiares, mas também impactos significativos nos sistemas de saúde e previdenciário.`
+
     const questionsData = [
         // BLOCO I
         // Ingles (1-8)
-        { q: 1, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: 'Drug trafficking is a major global issue. Criminal organizations use sophisticated methods to conceal drugs in commercial shipping. No single country can address this problem alone. It requires international cooperation and intelligence sharing. Modern detection technologies help, but traffickers are constantly adapting. Nevertheless, the cost of drug abuse to society, including healthcare and law enforcement, is staggering.', txt: 'According to the text, criminal organizations use only commercial shipping methods to transport illegal drugs.', ans: 'ERRADO' },
-        { q: 2, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'The word "sophisticated" in the first paragraph could be replaced by complex without changing the meaning of the sentence.', ans: 'CERTO' },
-        { q: 3, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'Maria Santos suggests that fighting drug trafficking requires countries to work together.', ans: 'CERTO' },
-        { q: 4, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'In the phrase "No single country can address this problem alone", the word "address" means to speak to.', ans: 'ERRADO' },
-        { q: 5, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'The text states that detection technologies have completely eliminated the ability of traffickers to conceal drugs.', ans: 'ERRADO' },
-        { q: 6, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'The word "Nevertheless" in the third paragraph introduces an idea of contrast.', ans: 'CERTO' },
-        { q: 7, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'According to the text, the negative effects of drug trafficking are limited to law enforcement costs.', ans: 'ERRADO' },
-        { q: 8, s: 'PORTUGUES', t: 'Língua Inglesa', txt: 'It can be inferred from the text that the global cost of illegal drug use is substantial.', ans: 'CERTO' },
+        { q: 1, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'According to the text, criminal organizations use only commercial shipping methods to transport illegal drugs.', ans: 'ERRADO' },
+        { q: 2, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'The word "sophisticated" in the first paragraph could be replaced by complex without changing the meaning of the sentence.', ans: 'CERTO' },
+        { q: 3, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'Maria Santos suggests that fighting drug trafficking requires countries to work together.', ans: 'CERTO' },
+        { q: 4, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'In the phrase "No single country can address this problem alone", the word "address" means to speak to.', ans: 'ERRADO' },
+        { q: 5, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'The text states that detection technologies have completely eliminated the ability of traffickers to conceal drugs.', ans: 'ERRADO' },
+        { q: 6, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'The word "Nevertheless" in the third paragraph introduces an idea of contrast.', ans: 'CERTO' },
+        { q: 7, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'According to the text, the negative effects of drug trafficking are limited to law enforcement costs.', ans: 'ERRADO' },
+        { q: 8, s: 'PORTUGUES', t: 'Língua Inglesa', supportText: textEnglish, txt: 'It can be inferred from the text that the global cost of illegal drug use is substantial.', ans: 'CERTO' },
         // Portugues (9-20)
-        { q: 9, s: 'PORTUGUES', t: 'Interpretação de Texto', txt: 'Infere-se do primeiro parágrafo que a fiscalização nas rodovias federais contribui para a segurança pública.', ans: 'CERTO' },
-        { q: 10, s: 'PORTUGUES', t: 'Reescrita', txt: 'A expressão "no exercício de suas atribuições" poderia ser substituída por quando exercem suas funções, mantendo-se a correção gramatical e o sentido original.', ans: 'CERTO' },
-        { q: 11, s: 'PORTUGUES', t: 'Coesão', txt: 'O pronome "suas", em "suas atribuições", refere-se a "rodovias federais brasileiras".', ans: 'ERRADO' },
+        { q: 9, s: 'PORTUGUES', t: 'Interpretação de Texto', supportText: textPortugues, txt: 'Infere-se do primeiro parágrafo que a fiscalização nas rodovias federais contribui para a segurança pública.', ans: 'CERTO' },
+        { q: 10, s: 'PORTUGUES', t: 'Reescrita', supportText: textPortugues, txt: 'A expressão "no exercício de suas atribuições" poderia ser substituída por quando exercem suas funções, mantendo-se a correção gramatical e o sentido original.', ans: 'CERTO' },
+        { q: 11, s: 'PORTUGUES', t: 'Coesão', supportText: textPortugues, txt: 'O pronome "suas", em "suas atribuições", refere-se a "rodovias federais brasileiras".', ans: 'ERRADO' },
         { q: 12, s: 'PORTUGUES', t: 'Coesão', txt: 'No segundo parágrafo, a expressão "Dessa forma" estabelece relação de consequência com o período anterior.', ans: 'CERTO' },
         { q: 13, s: 'PORTUGUES', t: 'Verbos', txt: 'A locução verbal "tem se mostrado" poderia ser reescrita como tem-se mostrado, sem prejuízo da correção gramatical.', ans: 'CERTO' },
         { q: 14, s: 'PORTUGUES', t: 'Sintaxe', txt: 'No trecho "permitem a identificação de rotas", o sujeito da forma verbal "permitem" é composto.', ans: 'CERTO' },

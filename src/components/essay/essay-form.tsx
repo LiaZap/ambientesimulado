@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { PenTool, Send, Loader2, UploadCloud, FileText, CheckCircle2 } from 'lucide-react'
+import { PenTool, Send, Loader2, UploadCloud, FileText, CheckCircle2, Coins, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,17 +16,27 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface EssayFormProps {
     initialTheme?: string
     examId?: string
+    userCredits: number
 }
 
-export function EssayForm({ initialTheme, examId }: EssayFormProps) {
+export function EssayForm({ initialTheme, examId, userCredits }: EssayFormProps) {
     const [isPending, setIsPending] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
     const [fileName, setFileName] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
+    // Check if user has enough credits
+    const hasCredits = userCredits >= 1
+
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
+
+        if (!hasCredits) {
+            setMessage("Você não possui créditos suficientes.")
+            return
+        }
+
         setIsPending(true)
         setMessage(null)
 
@@ -104,16 +114,25 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="w-full h-full flex flex-col"
                     >
-                        <CardHeader className="border-b border-slate-800 bg-slate-900/50 pb-6">
-                            <CardTitle className="text-xl flex items-center gap-3 text-white">
+                        <CardHeader className="border-b border-slate-800 bg-slate-900/50 pb-6 flex flex-row items-center justify-between">
+                            <div className="flex items-center gap-3">
                                 <div className="p-2 bg-yellow-500/10 rounded-lg">
                                     <PenTool className="h-6 w-6 text-yellow-500" />
                                 </div>
                                 <div>
-                                    <span className="block font-bold">Nova Redação</span>
-                                    <span className="block text-sm font-normal text-slate-400 mt-1">Envie seu texto ou foto para correção instantânea</span>
+                                    <CardTitle className="text-xl text-white">Nova Redação</CardTitle>
+                                    <p className="text-sm font-normal text-slate-400 mt-1">Envie seu texto ou foto para correção instantânea</p>
                                 </div>
-                            </CardTitle>
+                            </div>
+                            <div className={cn(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium",
+                                hasCredits
+                                    ? "bg-slate-800 border-slate-700 text-yellow-500"
+                                    : "bg-red-500/10 border-red-500/20 text-red-400"
+                            )}>
+                                <Coins className="h-4 w-4" />
+                                <span>{userCredits} Créditos Disponíveis</span>
+                            </div>
                         </CardHeader>
 
                         <CardContent className="flex-1 p-6 space-y-6 min-h-0">
@@ -178,22 +197,37 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
 
                                 {message && !isPending && (
                                     <div className="flex items-center gap-2 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-in slide-in-from-bottom-2">
+                                        <AlertCircle className="h-4 w-4" />
                                         <span className="font-bold">Erro:</span> {message}
                                     </div>
                                 )}
 
-                                <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
-                                    <Button type="button" variant="ghost" asChild className="text-slate-400 hover:text-white hover:bg-slate-800 h-12 px-6">
-                                        <Link href="/redacao">Cancelar</Link>
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        className="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold h-12 px-8 text-lg shadow-lg shadow-yellow-500/20 transition-all hover:scale-105"
-                                        disabled={isPending}
-                                    >
-                                        <Send className="mr-2 h-5 w-5" />
-                                        Enviar para Correção
-                                    </Button>
+                                <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+                                    <div className="text-sm text-slate-400 flex items-center gap-1.5">
+                                        <span>Custo da correção:</span>
+                                        <span className="text-yellow-500 font-bold flex items-center gap-1">
+                                            1 Crédito
+                                        </span>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <Button type="button" variant="ghost" asChild className="text-slate-400 hover:text-white hover:bg-slate-800 h-12 px-6">
+                                            <Link href="/redacao">Cancelar</Link>
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            className={cn(
+                                                "font-bold h-12 px-8 text-lg shadow-lg transition-all hover:scale-105",
+                                                hasCredits
+                                                    ? "bg-yellow-500 hover:bg-yellow-400 text-slate-950 shadow-yellow-500/20"
+                                                    : "bg-slate-800 text-slate-500 cursor-not-allowed hover:bg-slate-800 hover:scale-100"
+                                            )}
+                                            disabled={isPending || !hasCredits}
+                                        >
+                                            <Send className="mr-2 h-5 w-5" />
+                                            {hasCredits ? 'Enviar para Correção' : 'Créditos Insuficientes'}
+                                        </Button>
+                                    </div>
                                 </div>
                             </form>
                         </CardContent>

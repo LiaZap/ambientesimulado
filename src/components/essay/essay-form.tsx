@@ -25,24 +25,28 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
-    async function handleSubmit(formData: FormData) {
+    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
         setIsPending(true)
-        // Message is now shown via the UI state change, but we keep this for error handling fallback
-        setMessage("Aguarde...")
+        setMessage(null)
+
+        const formData = new FormData(e.currentTarget)
 
         try {
             if (examId) {
                 formData.append('examId', examId)
             }
 
+            // Artificial delay to ensure animation is visible
+            await new Promise(resolve => setTimeout(resolve, 2000))
+
             const result = await submitEssay(undefined, formData)
 
             if (typeof result === 'object' && result?.success && result?.essayId) {
-                // Keep the loading state a bit longer or redirect immediately
                 router.push(`/redacao/${result.essayId}`)
             } else if (typeof result === 'object' && result?.error) {
                 setMessage(result.error)
-                setIsPending(false) // Go back to form on error
+                setIsPending(false)
             } else if (typeof result === 'string') {
                 setMessage(result)
                 setIsPending(false)
@@ -63,7 +67,7 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
     }
 
     return (
-        <Card className="bg-slate-900 border-slate-800 text-slate-100 shadow-2xl overflow-hidden relative min-h-[600px] flex flex-col justify-center">
+        <Card className="bg-slate-900 border-slate-800 text-slate-100 shadow-2xl overflow-hidden relative h-[700px] flex flex-col justify-center">
 
             <AnimatePresence mode="wait">
                 {isPending ? (
@@ -112,8 +116,8 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
                             </CardTitle>
                         </CardHeader>
 
-                        <CardContent className="flex-1 p-6 space-y-6">
-                            <form action={handleSubmit} className="space-y-6 h-full flex flex-col">
+                        <CardContent className="flex-1 p-6 space-y-6 min-h-0">
+                            <form onSubmit={onSubmit} className="space-y-6 h-full flex flex-col">
                                 <div className="space-y-2">
                                     <Label htmlFor="theme" className="text-slate-300 font-medium">Tema da Redação</Label>
                                     <Input
@@ -122,16 +126,16 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
                                         defaultValue={initialTheme}
                                         placeholder="Ex: A importância da PRF na segurança viária..."
                                         required
-                                        className="bg-slate-950 border-slate-800 focus:border-yellow-500 focus:ring-yellow-500/20 h-12 text-lg placeholder:text-slate-600 transition-all"
+                                        className="bg-slate-950 border-slate-800 focus:border-yellow-500 focus:ring-yellow-500/20 h-12 text-lg placeholder:text-slate-600 transition-all w-full"
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                                    <div className="space-y-2 flex flex-col">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0">
+                                    <div className="space-y-2 flex flex-col h-full min-h-0">
                                         <Label className="text-slate-300 font-medium">Upload de Arquivo</Label>
                                         <div
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="flex-1 border-2 border-dashed border-slate-700 rounded-xl bg-slate-950/50 hover:bg-slate-950 hover:border-yellow-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-6 group text-center"
+                                            className="flex-1 border-2 border-dashed border-slate-700 rounded-xl bg-slate-950/50 hover:bg-slate-950 hover:border-yellow-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-6 group text-center min-h-[200px]"
                                         >
                                             <input
                                                 ref={fileInputRef}
@@ -147,7 +151,7 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
                                             </div>
 
                                             {fileName ? (
-                                                <div className="bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full text-sm font-bold truncate max-w-full border border-yellow-500/20">
+                                                <div className="bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full text-sm font-bold truncate max-w-[200px] border border-yellow-500/20">
                                                     {fileName}
                                                 </div>
                                             ) : (
@@ -159,14 +163,16 @@ export function EssayForm({ initialTheme, examId }: EssayFormProps) {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2 flex flex-col">
+                                    <div className="space-y-2 flex flex-col h-full min-h-0">
                                         <Label htmlFor="content" className="text-slate-300 font-medium">Digitar Redação</Label>
-                                        <Textarea
-                                            id="content"
-                                            name="content"
-                                            placeholder="Ou digite sua redação diretamente aqui..."
-                                            className="flex-1 bg-slate-950 border-slate-800 focus:border-yellow-500 focus:ring-yellow-500/20 resize-none p-4 leading-relaxed scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent min-h-[200px]"
-                                        />
+                                        <div className="flex-1 relative min-h-0">
+                                            <Textarea
+                                                id="content"
+                                                name="content"
+                                                placeholder="Ou digite sua redação diretamente aqui..."
+                                                className="absolute inset-0 w-full h-full bg-slate-950 border-slate-800 focus:border-yellow-500 focus:ring-yellow-500/20 resize-none p-4 leading-relaxed scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent text-slate-200"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 

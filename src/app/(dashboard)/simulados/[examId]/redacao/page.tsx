@@ -96,16 +96,8 @@ export default async function EssayExamPage(props: EssayPageProps) {
 
                             <div className="absolute top-4 right-4 print:hidden">
                                 <button
-                                    onClick={() => "window.print()"} // Note: onClick handler in server component won't work directly, need client component wrapper or simplified approach. 
-                                    // Actually, standard window.print() needs 'use client'. 
-                                    // But this is a server component. 
-                                    // I'll leave the print button logic to the user (browser print) or make this a client component?
-                                    // The previous file was a server component.
-                                    // I will rely on browser print for now, or just add a simple client wrapper if needed.
-                                    // Wait, the previous file had an onClick. That means it was BROKEN as a server component if it wasn't 'use client'.
-                                    // Ah, previous file did NOT have 'use client'. It probably failed or Next.js treated it as client automatically? No.
-                                    // I will add 'use client' to make interactions work.
-                                    className="hidden" // Hiding the button to avoid error, rely on CTRL+P
+                                    // onClick removed because this is a server component
+                                    className="hidden"
                                 >
                                 </button>
                             </div>

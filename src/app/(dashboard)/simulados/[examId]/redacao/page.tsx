@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EssayForm } from "@/components/essay/essay-form"
 import { Printer, PenTool } from "lucide-react"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 
 interface EssayPageProps {
     params: Promise<{
@@ -13,6 +15,13 @@ interface EssayPageProps {
 export default async function EssayExamPage(props: EssayPageProps) {
     const params = await props.params
     const exam = await getExam(params.examId)
+    const session = await auth()
+
+    // Fetch user current credits
+    const user = session?.user?.id ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { credits: true }
+    }) : null
 
     if (!exam) {
         notFound()
@@ -48,7 +57,11 @@ export default async function EssayExamPage(props: EssayPageProps) {
 
                     <TabsContent value="ai" className="mt-6">
                         <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                            <EssayForm initialTheme={`Tema da Redação: ${exam.title}`} examId={exam.id} />
+                            <EssayForm
+                                initialTheme={`Tema da Redação: ${exam.title}`}
+                                examId={exam.id}
+                                userCredits={user?.credits ?? 0}
+                            />
                         </div>
                     </TabsContent>
 

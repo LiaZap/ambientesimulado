@@ -114,7 +114,13 @@ export function ExamInterface({ examId, title, questions, mode = 'EXAM' }: ExamI
         const isSelected = (val: string) => answers[currentQuestion.id] === val
         const isAnswered = !!answers[currentQuestion.id]
         // Training Mode Logic
-        const isCorrect = isAnswered && currentQuestion.correctAnswer === answers[currentQuestion.id]
+        // Normalize comparison to be safe against whitespace or case issues
+        const userAnswer = answers[currentQuestion.id]
+        const correct = currentQuestion.correctAnswer
+
+        const isCorrect = isAnswered &&
+            userAnswer?.trim().toUpperCase() === correct?.trim().toUpperCase()
+
         const isTraining = mode === 'TRAINING'
 
         if (currentQuestion.options && typeof currentQuestion.options === 'object' && Object.keys(currentQuestion.options).length > 0) {
@@ -478,9 +484,12 @@ export function ExamInterface({ examId, title, questions, mode = 'EXAM' }: ExamI
                             <div className="bg-slate-50 px-8 py-6 border-t border-slate-100 flex justify-between items-center">
                                 <Button
                                     onClick={handlePrev}
-                                    disabled={currentIndex === 0}
+                                    disabled={currentIndex === 0 || mode === 'TRAINING'}
                                     variant="outline"
-                                    className="border-slate-300 text-slate-600 hover:text-slate-900 hover:border-slate-400 font-bold px-6"
+                                    className={cn(
+                                        "border-slate-300 text-slate-600 hover:text-slate-900 hover:border-slate-400 font-bold px-6",
+                                        (currentIndex === 0 || mode === 'TRAINING') && "opacity-50 pointer-events-none"
+                                    )}
                                 >
                                     <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
                                 </Button>

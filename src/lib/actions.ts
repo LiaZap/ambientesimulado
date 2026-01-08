@@ -287,8 +287,9 @@ export async function finishExamAttempt(examId: string, answers: Record<string, 
         })
 
         const score = correct - wrong
-        let xpEarned = (correct * 10) - (wrong * 5) + 20
-        if (xpEarned < 0) xpEarned = 10
+        // User Request: "cada ponto gera um de xp"
+        // So XP = Score. We ensure it's not negative for XP purposes.
+        let xpEarned = Math.max(0, score)
 
         // Save Attempt
         await prisma.examAttempt.create({

@@ -536,11 +536,27 @@ export async function createExam(_prevState: string | undefined, formData: FormD
 
 export async function deleteExam(examId: string) {
     const session = await auth()
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") return { error: "Não autorizado" }
+    if (!session?.user?.id) return { error: "Não autorizado" }
 
     try {
+        const exam = await prisma.exam.findUnique({
+            where: { id: examId },
+            select: { isCustom: true, creatorId: true }
+        })
+
+        if (!exam) return { error: "Simulado não encontrado" }
+
+        // Check permissions: Admin OR (Custom Exam + Creator)
+        const isAdmin = session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN"
+        const isOwner = exam.isCustom && exam.creatorId === session.user.id
+
+        if (!isAdmin && !isOwner) {
+            return { error: "Sem permissão para excluir este simulado" }
+        }
+
         await prisma.exam.delete({ where: { id: examId } })
         revalidatePath("/admin/simulados")
+        revalidatePath("/simulados") // Revalidate the user dashboard too
         return { success: true }
     } catch (_error) {
         return { error: "Erro ao excluir simulado" }

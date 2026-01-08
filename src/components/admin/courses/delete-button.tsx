@@ -39,7 +39,11 @@ export function DeleteButton({ id, type }: DeleteButtonProps) {
                 await deleteLesson(id)
                 router.refresh()
             } else if (type === 'question') {
-                await deleteQuestion(id) // Needs import
+                await deleteQuestion(id)
+                router.refresh()
+            } else if (type === 'exam') {
+                const result = await deleteExam(id)
+                if (result?.error) throw new Error(result.error)
                 router.refresh()
             }
         } catch (error) {

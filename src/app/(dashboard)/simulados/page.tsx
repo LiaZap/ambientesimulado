@@ -1,11 +1,11 @@
 import { getExams } from "@/lib/data"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Clock, FileText, PlayCircle, Printer, CheckSquare, Brain, Target } from "lucide-react"
+import { FileText, Target } from "lucide-react"
 import { SmartExamBuilder } from "@/components/exam/smart-exam-builder"
 import { CreateQuestionDialog } from "@/components/exam/create-question-dialog"
 import { auth } from "@/lib/auth"
+import { ExamCard } from "@/components/exam/exam-card"
 
 export const metadata = {
     title: "Simulados | PRF Ambiente Simulado",
@@ -40,6 +40,7 @@ export default async function SimuladosPage() {
                 </div>
             )}
 
+            {/* Existing Orientations & Official Exams code... */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <FileText className="h-6 w-6 text-yellow-500" />
@@ -48,7 +49,6 @@ export default async function SimuladosPage() {
                 <CreateQuestionDialog />
             </div>
 
-            {/* Orientations Section (Collapsible or smaller maybe? keeping as is for now) */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 mb-8">
                 <h2 className="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-widest">
                     Orientações
@@ -84,63 +84,3 @@ export default async function SimuladosPage() {
     )
 }
 
-function ExamCard({ exam, isCustom }: { exam: any, isCustom?: boolean }) {
-    return (
-        <Card className="bg-slate-900 border-slate-800 flex flex-col hover:border-slate-700 transition-all duration-300">
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl text-white">{exam.title}</CardTitle>
-                    {isCustom && (
-                        <span className="px-2 py-1 bg-yellow-500/10 text-yellow-500 text-xs rounded border border-yellow-500/20">Custom</span>
-                    )}
-                </div>
-                <CardDescription className="text-slate-400 line-clamp-2">
-                    {exam.description || "Simulado completo para o concurso PRF."}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1">
-                <div className="flex justify-between items-center text-sm text-slate-400">
-                    <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-yellow-500" />
-                        <span>{exam._count?.questions || exam.totalQuestions} Questões</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-yellow-500" />
-                        <span>{Math.floor(exam.duration / 60)}h {exam.duration % 60}m</span>
-                    </div>
-                </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3 pt-2">
-                <Link href={isCustom ? `/simulados/${exam.id}?mode=TRAINING` : `/simulados/${exam.id}`} className="w-full">
-                    <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold group">
-                        <PlayCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                        {isCustom ? "Treinar Agora" : "Fazer Online"}
-                    </Button>
-                </Link>
-
-                {!isCustom && (
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                        <Link href={`/simulados/${exam.id}/imprimir`} target="_blank" className="w-full">
-                            <Button variant="outline" className="w-full border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
-                                <Printer className="w-4 h-4 mr-2" />
-                                Imprimir
-                            </Button>
-                        </Link>
-                        <Link href={`/simulados/${exam.id}/gabarito`} target="_blank" className="w-full">
-                            <Button variant="outline" className="w-full border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
-                                <CheckSquare className="w-4 h-4 mr-2" />
-                                Gabarito
-                            </Button>
-                        </Link>
-                        <Link href={`/simulados/${exam.id}/redacao`} target="_blank" className="col-span-2 w-full">
-                            <Button variant="outline" className="w-full border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
-                                <FileText className="w-4 h-4 mr-2" />
-                                Folha de Redação
-                            </Button>
-                        </Link>
-                    </div>
-                )}
-            </CardFooter>
-        </Card>
-    )
-}

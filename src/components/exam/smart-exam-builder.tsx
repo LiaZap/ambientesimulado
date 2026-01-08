@@ -24,10 +24,9 @@ const SUBJECTS = [
 
 export function SmartExamBuilder() {
     const router = useRouter()
-    const [loading, setLoading] = useState(false)
     const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
-    const [count, setCount] = useState(30)
-    const [useMyQuestions, setUseMyQuestions] = useState(false)
+    const [questionCount, setQuestionCount] = useState([30])
+    const [isGenerating, setIsGenerating] = useState(false)
 
     const toggleSubject = (id: string) => {
         setSelectedSubjects(prev =>
@@ -35,32 +34,31 @@ export function SmartExamBuilder() {
         )
     }
 
-    const handleCreate = async () => {
+    const startTraining = async () => {
         if (selectedSubjects.length === 0) {
-            toast.error("Selecione pelo menos uma matéria.")
+            toast.error("Selecione pelo menos uma matéria")
             return
         }
 
-        setLoading(true)
+        setIsGenerating(true)
         try {
             const result = await createCustomExam({
                 subjects: selectedSubjects,
-                count,
-                useMyQuestions,
+                count: questionCount[0],
                 title: `Treino Personalizado - ${new Date().toLocaleDateString('pt-BR')}`
             })
 
             if (result.success && result.examId) {
                 toast.success("Treino gerado com sucesso!")
-                router.push(`/simulados/${result.examId}?mode=TRAINING`)
+                router.push(`/simulados/${result.examId}/treinar`)
             } else {
-                toast.error(result.error || "Erro ao criar treino.")
+                toast.error(result.error || "Erro ao gerar treino")
             }
         } catch (error) {
-            toast.error("Erro inesperado.")
+            toast.error("Erro inesperado")
             console.error(error)
         } finally {
-            setLoading(false)
+            setIsGenerating(false)
         }
     }
 
@@ -128,36 +126,29 @@ export function SmartExamBuilder() {
                         <span>120</span>
                     </div>
 
-                    <div className="flex items-center space-x-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
-                        <Checkbox
-                            id="my-questions"
-                            checked={useMyQuestions}
-                            onCheckedChange={(c) => setUseMyQuestions(c as boolean)}
-                            className="border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
-                        />
-                        <Label htmlFor="my-questions" className="text-sm font-medium text-slate-300 cursor-pointer">
-                            Usar apenas questões criadas por mim
-                        </Label>
-                    </div>
                 </div>
 
             </CardContent>
             <CardFooter>
-                <Button
-                    onClick={handleCreate}
-                    disabled={loading || selectedSubjects.length === 0}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold h-12 text-lg shadow-lg shadow-yellow-500/20"
-                >
-                    {loading ? (
-                        <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...
-                        </>
-                    ) : (
-                        <>
-                            <Sparkles className="mr-2 h-5 w-5" /> Gerar Treino Personalizado
-                        </>
-                    )}
-                </Button>
+                <div className="flex justify-end p-6 border-t border-slate-800 w-full -mx-6 -mb-6">
+                    <Button
+                        onClick={startTraining}
+                        disabled={isGenerating || selectedSubjects.length === 0}
+                        className="bg-yellow-500 text-slate-900 hover:bg-yellow-400 font-bold text-lg px-8 py-6 h-auto w-full md:w-auto shadow-lg shadow-yellow-500/20"
+                    >
+                        {isGenerating ? (
+                            <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                Gerando Treino...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="mr-2 h-5 w-5" />
+                                Gerar Treino Personalizado
+                            </>
+                        )}
+                    </Button>
+                </div>
             </CardFooter>
         </Card>
     )

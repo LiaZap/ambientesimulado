@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db"
 import { NextResponse } from "next/server"
 import crypto from "crypto"
+import { hash } from "bcryptjs"
+import { sendWelcomeEmail } from "@/lib/mail"
 
 // Kiwify Webhook Handler
 // Documentation: https://help.kiwify.com.br/en/articles/5966675-webhooks
@@ -36,19 +38,33 @@ export async function POST(req: Request) {
         })
 
         if (!user) {
-            // Create a temporary user or handle registration flow
-            // For now, we only proceed if user exists or we create a shallow one
-            // A better approach is usually to require user to register first, or create with a temp password
-            const tempPassword = crypto.randomBytes(8).toString("hex")
-            // NOTE: You would need to hash this if storing, but for now let's assume
-            // we create the user without a password (auth via magic link) or handle it later.
-            // Here accessing prisma directly to avoid circular dips if actions import headers
+            // Create a new user
+            const tempPassword = crypto.randomBytes(4).toString("hex") // 8 chars
+            const hashedPassword = await hash(tempPassword, 10)
+
             user = await prisma.user.create({
                 data: {
                     email: Customer.email,
                     name: Customer.full_name || "Aluno Kiwify",
-                    // password: hash(tempPassword), // Skip for now
+                    password: hashedPassword,
+                    role: 'PREMIUM', // Default role for paying users
+                    profile: {
+                        create: {
+                            level: 1,
+                            xp: 0,
+                            rank: 'Recruta',
+                            streak: 0
+                        }
+                    }
                 }
+            })
+
+            // Send Welcome Email
+            await sendWelcomeEmail({
+                email: user.email,
+                name: user.name,
+                password: tempPassword,
+                planName: plan.name
             })
         }
 

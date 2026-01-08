@@ -7,6 +7,8 @@ import { Plus, Search, Edit, BookOpen } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { DeleteButton } from "@/components/admin/courses/delete-button"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminCoursesPage() {
     const courses = await getAllCourses()
 

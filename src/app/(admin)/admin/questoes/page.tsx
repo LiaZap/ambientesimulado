@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { DeleteButton } from "@/components/admin/courses/delete-button"
 import { QuestionBulkImport } from "@/components/admin/questions/question-bulk-import"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminQuestionsPage() {
     const questions = await getQuestions()
 

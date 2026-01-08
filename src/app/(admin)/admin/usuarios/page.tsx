@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import { UserActionsMenu } from "@/components/admin/users/user-actions-menu"
+import { prisma } from "@/lib/db"
+
 
 // Force dynamic rendering to ensure fresh data
 export const dynamic = "force-dynamic"

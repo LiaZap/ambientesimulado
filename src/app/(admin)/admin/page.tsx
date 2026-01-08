@@ -2,6 +2,8 @@ import { getDashboardStats } from "@/lib/data"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, BookOpen, FileText, Activity } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
     // We can reuse getDashboardStats or create a specific admin one
     // For now, let's just show some static or available data placeholders

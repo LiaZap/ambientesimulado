@@ -4,6 +4,8 @@ import Link from "next/link"
 import { Plus, FileText, Trash2, Edit } from "lucide-react"
 import { DeleteButton } from "@/components/admin/courses/delete-button"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminExamsPage() {
     const exams = await getExams() || []
 

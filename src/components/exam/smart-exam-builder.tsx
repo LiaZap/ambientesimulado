@@ -109,11 +109,11 @@ export function SmartExamBuilder() {
                 <div className="space-y-4">
                     <div className="flex justify-between">
                         <Label className="text-slate-300">Quantidade de Questões</Label>
-                        <span className="font-mono font-bold text-yellow-500 text-lg">{count}</span>
+                        <span className="font-mono font-bold text-yellow-500 text-lg">{questionCount[0]}</span>
                     </div>
                     <Slider
-                        value={[count]}
-                        onValueChange={(vals) => setCount(vals[0])}
+                        value={questionCount}
+                        onValueChange={setQuestionCount}
                         min={5}
                         max={120}
                         step={5}

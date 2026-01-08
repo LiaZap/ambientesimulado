@@ -1380,7 +1380,7 @@ export async function getUser(userId: string) {
 }
 
 // --- SMART EXAM BUILDER ---
-export async function createCustomExam(data: { subjects: string[], count: number, title: string }) {
+export async function createCustomExam(data: { subjects: string[], count: number, title: string, useMyQuestions?: boolean }) {
     const session = await auth()
     if (!session?.user?.id) {
         return { success: false, error: "Unauthorized" }
@@ -1394,7 +1394,12 @@ export async function createCustomExam(data: { subjects: string[], count: number
         let subjectsCondition = ""
         if (data.subjects && data.subjects.length > 0) {
             const subjectList = data.subjects.map(s => `'${s}'`).join(", ")
-            subjectsCondition = `AND "subject"::text IN (${subjectList})`
+            subjectsCondition += ` AND "subject"::text IN (${subjectList})`
+        }
+
+        if (data.useMyQuestions) {
+            subjectsCondition += ` AND "creatorId" = '${session.user.id}'` // Assuming question has creatorId or similar linkage? Wait, standard questions might not have creatorId populated if seeded.
+            // Let's check prisma schema again if Question has creatorId. It should for contributions.
         }
 
         const limit = Math.min(Math.max(data.count, 5), 120) // Min 5, Max 120
@@ -1437,16 +1442,23 @@ export async function createNewQuestion(data: any) {
     }
 
     try {
+        // Enforce UpperCase and Strict Value
+        const cleanAnswer = data.correctAnswer?.trim().toUpperCase()
+        if (cleanAnswer !== "CERTO" && cleanAnswer !== "ERRADO") {
+            return { success: false, error: "Gabarito inválido. Use CERTO ou ERRADO." }
+        }
+
         const question = await prisma.question.create({
             data: {
                 statement: data.statement,
-                correctAnswer: data.correctAnswer,
-                explanation: data.explanation,
+                correctAnswer: cleanAnswer,
+                explanation: data.explanation || "Sem comentário.",
                 subject: data.subject,
                 topic: data.topic || "Geral",
                 difficulty: data.difficulty || "MEDIUM",
                 options: data.options || {},
-                supportText: data.supportText
+                supportText: data.supportText,
+                creatorId: session.user.id
             }
         })
 

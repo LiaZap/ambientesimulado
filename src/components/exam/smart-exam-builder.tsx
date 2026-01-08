@@ -27,6 +27,7 @@ export function SmartExamBuilder() {
     const [loading, setLoading] = useState(false)
     const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
     const [count, setCount] = useState(30)
+    const [useMyQuestions, setUseMyQuestions] = useState(false)
 
     const toggleSubject = (id: string) => {
         setSelectedSubjects(prev =>
@@ -45,6 +46,7 @@ export function SmartExamBuilder() {
             const result = await createCustomExam({
                 subjects: selectedSubjects,
                 count,
+                useMyQuestions,
                 title: `Treino Personalizado - ${new Date().toLocaleDateString('pt-BR')}`
             })
 
@@ -106,7 +108,6 @@ export function SmartExamBuilder() {
                     </div>
                 </div>
 
-                {/* Question Count Slider */}
                 <div className="space-y-4">
                     <div className="flex justify-between">
                         <Label className="text-slate-300">Quantidade de Questões</Label>
@@ -120,11 +121,23 @@ export function SmartExamBuilder() {
                         step={5}
                         className="py-4 cursor-pointer"
                     />
-                    <div className="flex justify-between text-xs text-slate-500 px-1">
+                    <div className="flex justify-between text-xs text-slate-500 px-1 mb-4">
                         <span>5</span>
                         <span>30</span>
                         <span>50</span>
                         <span>120</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
+                        <Checkbox
+                            id="my-questions"
+                            checked={useMyQuestions}
+                            onCheckedChange={(c) => setUseMyQuestions(c as boolean)}
+                            className="border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
+                        />
+                        <Label htmlFor="my-questions" className="text-sm font-medium text-slate-300 cursor-pointer">
+                            Usar apenas questões criadas por mim
+                        </Label>
                     </div>
                 </div>
 

@@ -50,7 +50,7 @@ export function SmartExamBuilder() {
 
             if (result.success && result.examId) {
                 toast.success("Treino gerado com sucesso!")
-                router.push(`/simulados/${result.examId}/treinar`)
+                router.push(`/simulados/${result.examId}?mode=TRAINING`)
             } else {
                 toast.error(result.error || "Erro ao gerar treino")
             }

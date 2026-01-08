@@ -123,6 +123,25 @@ async function main() {
         console.log('👤 User created.')
     }
 
+    // --- SYSTEM CONFIG ---
+    const config = await prisma.systemConfig.findFirst()
+    if (!config) {
+        await prisma.systemConfig.create({
+            data: {
+                facebookPixelId: '844000638501247',
+                siteName: 'PRF Ambiente Simulado',
+                maintenanceMode: false
+            }
+        })
+        console.log('⚙️ System Config created with Pixel ID.')
+    } else {
+        await prisma.systemConfig.update({
+            where: { id: config.id },
+            data: { facebookPixelId: '844000638501247' }
+        })
+        console.log('⚙️ System Config updated with Pixel ID.')
+    }
+
     // --- QUESTIONS DATA (Extracted from 2025-3 Script) ---
     // Texts
     const textEnglish = 'Drug trafficking is a major global issue. Criminal organizations use sophisticated methods to conceal drugs in commercial shipping. No single country can address this problem alone. It requires international cooperation and intelligence sharing. Modern detection technologies help, but traffickers are constantly adapting. Nevertheless, the cost of drug abuse to society, including healthcare and law enforcement, is staggering.'

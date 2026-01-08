@@ -31,7 +31,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const config = await prisma.systemConfig.findFirst();
+  let config = null;
+  try {
+    config = await prisma.systemConfig.findFirst();
+  } catch (error) {
+    console.error("Failed to fetch system config (likely during build):", error);
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>

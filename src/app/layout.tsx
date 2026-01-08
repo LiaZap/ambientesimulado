@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -47,7 +48,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FacebookPixel pixelId={config?.facebookPixelId} />
+          <Suspense fallback={null}>
+            <FacebookPixel pixelId={config?.facebookPixelId} />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>

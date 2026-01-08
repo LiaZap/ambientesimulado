@@ -1,21 +1,22 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-interface SendWelcomeEmailProps {
-    email: string;
-    name: string;
-    password?: string;
-    planName: string;
-}
 
 export async function sendWelcomeEmail({ email, name, password, planName }: SendWelcomeEmailProps) {
-    try {
-        const { data, error } = await resend.emails.send({
-            from: 'Acesso <nao-responda@ambientesimulado.online>',
-            to: [email],
-            subject: `Bem-vindo(a) ao PRF Ambiente Simulado! 🚀`,
-            html: `
+  const apiKey = process.env.RESEND_API_KEY
+
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY is not set. Email sending will be skipped.")
+    return { success: false, error: "Missing API Key" }
+  }
+
+  const resend = new Resend(apiKey);
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Acesso <nao-responda@ambientesimulado.online>',
+      to: [email],
+      subject: `Bem-vindo(a) ao PRF Ambiente Simulado! 🚀`,
+      html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
           <div style="background-color: #0f172a; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
              <h1 style="color: #fbbf24; margin: 0;">Bem-vindo(a)!</h1>
@@ -45,16 +46,16 @@ export async function sendWelcomeEmail({ email, name, password, planName }: Send
           </div>
         </div>
       `,
-        });
+    });
 
-        if (error) {
-            console.error('Error sending email:', error);
-            return { success: false, error };
-        }
-
-        return { success: true, data };
-    } catch (error) {
-        console.error('Exception sending email:', error);
-        return { success: false, error };
+    if (error) {
+      console.error('Error sending email:', error);
+      return { success: false, error };
     }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Exception sending email:', error);
+    return { success: false, error };
+  }
 }

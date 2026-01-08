@@ -1,6 +1,8 @@
 import { getSystemConfig } from "@/lib/actions"
 import { AdminConfigForm } from "@/components/admin/config-form"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminConfigPage() {
     const config = await getSystemConfig()
 

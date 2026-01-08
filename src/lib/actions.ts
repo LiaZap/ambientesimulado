@@ -1412,3 +1412,31 @@ export async function createCustomExam(data: { subjects: string[], count: number
         return { success: false, error: "Erro ao gerar simulado." }
     }
 }
+
+export async function createNewQuestion(data: any) {
+    const session = await auth()
+    if (!session?.user?.id) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        const question = await prisma.question.create({
+            data: {
+                statement: data.statement,
+                correctAnswer: data.correctAnswer,
+                explanation: data.explanation,
+                subject: data.subject,
+                topic: data.topic || "Geral",
+                difficulty: data.difficulty || "MEDIUM",
+                options: data.options || {},
+                supportText: data.supportText
+            }
+        })
+
+        return { success: true, questionId: question.id }
+    } catch (error) {
+        console.error("Error creating question:", error)
+        return { success: false, error: "Erro ao criar questão." }
+    }
+}
+

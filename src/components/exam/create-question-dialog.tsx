@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlusCircle, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { createQuestion } from "@/lib/actions"
+import { createNewQuestion } from "@/lib/actions"
 // Note: We'll need to export createQuestion from actions.ts if it's not already or create a user-facing version
 
 export function CreateQuestionDialog() {
@@ -35,7 +35,7 @@ export function CreateQuestionDialog() {
             // Check if createQuestion handles the specific structure or if we need a new action
             // Assuming createQuestion accepts this structure based on typical patterns
             // We might need to adjust based on grep results.
-            const result = await createQuestion({
+            const result = await createNewQuestion({
                 ...formData,
                 options: {}, // CEBRASPE style usually
                 supportText: ""

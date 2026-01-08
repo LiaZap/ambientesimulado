@@ -98,21 +98,6 @@ export default async function LandingPage() {
         </section>
 
 
-        {/* --- SOCIAL PROOF / LOGOS --- */}
-        <section className="py-10 border-y border-slate-800 bg-slate-900/50">
-          <div className="max-w-7xl mx-auto px-6 text-center">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mb-8">Reconhecido pela excelência</p>
-            <div className="flex flex-wrap justify-center items-center gap-10 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-              {/* Using Text as Logos to maintain clean look without external assets */}
-              <h3 className="font-bold text-2xl text-white">PRF<span className="text-yellow-500">2026</span></h3>
-              <h3 className="font-bold text-2xl text-white">TECH<span className="text-yellow-500">EDU</span></h3>
-              <h3 className="font-bold text-2xl text-white">ELITE<span className="text-yellow-500">CONCURSOS</span></h3>
-              <h3 className="font-bold text-2xl text-white">FUTURE<span className="text-yellow-500">LEARNING</span></h3>
-            </div>
-          </div>
-        </section>
-
-
         {/* --- "WHY US" SECTION (Text heavy content reduced for VSL focus) --- */}
         <section className="py-24 relative overflow-hidden bg-slate-950">
           <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">

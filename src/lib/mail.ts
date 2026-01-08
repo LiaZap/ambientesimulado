@@ -1,6 +1,13 @@
 import { Resend } from 'resend';
 
 
+interface SendWelcomeEmailProps {
+  email: string;
+  name: string;
+  password?: string;
+  planName: string;
+}
+
 export async function sendWelcomeEmail({ email, name, password, planName }: SendWelcomeEmailProps) {
   const apiKey = process.env.RESEND_API_KEY
 

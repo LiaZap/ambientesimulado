@@ -1441,6 +1441,11 @@ export async function createNewQuestion(data: any) {
         return { success: false, error: "Unauthorized" }
     }
 
+    // Security Check: Only Admins can create public questions
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
+        return { success: false, error: "Apenas administradores podem criar questões públicas." }
+    }
+
     try {
         // Enforce UpperCase and Strict Value
         const cleanAnswer = data.correctAnswer?.trim().toUpperCase()
@@ -1466,6 +1471,43 @@ export async function createNewQuestion(data: any) {
     } catch (error) {
         console.error("Error creating question:", error)
         return { success: false, error: "Erro ao criar questão." }
+    }
+}
+
+export async function getErrorNotebook() {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Não autorizado", questions: [] }
+
+    try {
+        const wrongAnswers = await prisma.answer.findMany({
+            where: {
+                userId: session.user.id,
+                isCorrect: false
+            },
+            include: {
+                question: true
+            },
+            orderBy: {
+                answeredAt: 'desc'
+            }
+        })
+
+        // Filter duplicates - keep only the most recent wrong answer for each question
+        // preventing the same question from appearing multiple times
+        const uniqueQuestionsMap = new Map()
+
+        wrongAnswers.forEach(ans => {
+            if (!uniqueQuestionsMap.has(ans.questionId)) {
+                uniqueQuestionsMap.set(ans.questionId, ans.question)
+            }
+        })
+
+        const questions = Array.from(uniqueQuestionsMap.values())
+
+        return { success: true, questions }
+    } catch (error) {
+        console.error("Error fetching error notebook:", error)
+        return { success: false, error: "Erro ao buscar caderno de erros", questions: [] }
     }
 }
 

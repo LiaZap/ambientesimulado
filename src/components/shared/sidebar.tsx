@@ -14,6 +14,7 @@ const routes = [
     { label: "Material", icon: LayoutList, href: "/aulas" },
     { label: "Redação IA", icon: PenTool, href: "/redacao" },
     { label: "Simulados", icon: ClipboardList, href: "/simulados" },
+    { label: "Caderno de Erros", icon: BookOpen, href: "/caderno-erros" },
     { label: "Ranking", icon: Trophy, href: "/ranking" },
     { label: "Perfil & Conquistas", icon: UserCircle, href: "/perfil" },
     { label: "IA Assistente", icon: Sparkles, href: "/ia-assistente" },

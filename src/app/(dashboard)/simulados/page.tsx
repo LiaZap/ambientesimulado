@@ -46,7 +46,10 @@ export default async function SimuladosPage() {
                     <FileText className="h-6 w-6 text-yellow-500" />
                     Simulados Oficiais
                 </h2>
-                <CreateQuestionDialog />
+                {/* Only Admins can create questions via this button now */}
+                {(session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN") && (
+                    <CreateQuestionDialog />
+                )}
             </div>
 
             <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 mb-8">

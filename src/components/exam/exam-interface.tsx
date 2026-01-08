@@ -118,8 +118,14 @@ export function ExamInterface({ examId, title, questions, mode = 'EXAM' }: ExamI
         const userAnswer = answers[currentQuestion.id]
         const correct = currentQuestion.correctAnswer
 
-        const isCorrect = isAnswered &&
-            userAnswer?.trim().toUpperCase() === correct?.trim().toUpperCase()
+        const isCorrect = isAnswered && (
+            userAnswer?.trim().toUpperCase() === correct?.trim().toUpperCase() ||
+            // Handle ambiguous C/E vs CERTO/ERRADO cases where dirty data might render as Multiple Choice
+            (userAnswer === 'C' && correct === 'CERTO') ||
+            (userAnswer === 'E' && correct === 'ERRADO') ||
+            (userAnswer === 'CERTO' && correct === 'C') ||
+            (userAnswer === 'ERRADO' && correct === 'E')
+        )
 
         const isTraining = mode === 'TRAINING'
 

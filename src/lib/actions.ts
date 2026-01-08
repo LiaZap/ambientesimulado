@@ -269,8 +269,15 @@ export async function finishExamAttempt(examId: string, answers: Record<string, 
             const isAnswered = userAnswer !== undefined && userAnswer !== ""
 
             // Normalize comparison (A vs a)
+            const u = userAnswer?.toUpperCase()
+            const c = q.correctAnswer.toUpperCase()
+
             const isCorrect = isAnswered
-                ? userAnswer.toUpperCase() === q.correctAnswer.toUpperCase()
+                ? u === c ||
+                (u === 'C' && c === 'CERTO') ||
+                (u === 'E' && c === 'ERRADO') ||
+                (u === 'CERTO' && c === 'C') ||
+                (u === 'ERRADO' && c === 'E')
                 : false
 
             if (isAnswered) {

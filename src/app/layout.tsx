@@ -23,11 +23,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { prisma } from "@/lib/db";
+import { FacebookPixel } from "@/components/analytics/facebook-pixel";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const config = await prisma.systemConfig.findFirst();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -37,6 +42,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <FacebookPixel pixelId={config?.facebookPixelId} />
           {children}
         </ThemeProvider>
       </body>

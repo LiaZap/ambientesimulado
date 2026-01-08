@@ -446,6 +446,7 @@ model SystemConfig {
   n8nAssistantWebhookUrl String? // For AI Chat/Assistant
   n8nPlanningWebhookUrl String? // For Study Planning
   landingPageVideoUrl String? // Youtube/Vimeo/Mp4 URL for Landing Page VSL
+  facebookPixelId String? // Meta Pixel ID for tracking conversions
   siteName        String   @default("PRF Ambiente Simulado")
   maintenanceMode Boolean  @default(false)
   xpPerLesson     Int      @default(50)

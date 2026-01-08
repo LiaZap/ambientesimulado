@@ -24,8 +24,9 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
     const [xpLesson, setXpLesson] = useState(initialConfig?.xpPerLesson || 50)
     const [xpExam, setXpExam] = useState(initialConfig?.xpBaseExam || 20)
     const [videoUrl, setVideoUrl] = useState(initialConfig?.landingPageVideoUrl || "")
+    const [pixelId, setPixelId] = useState(initialConfig?.facebookPixelId || "")
 
-    const handleSave = async (section: 'general' | 'gamification' | 'integration' | 'landing') => {
+    const handleSave = async (section: 'general' | 'gamification' | 'integration' | 'landing' | 'marketing') => {
         setIsLoading(true)
         try {
             const data: any = {}
@@ -41,6 +42,8 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                 data.n8nPlanningWebhookUrl = planningWebhookUrl
             } else if (section === 'landing') {
                 data.landingPageVideoUrl = videoUrl
+            } else if (section === 'marketing') {
+                data.facebookPixelId = pixelId
             }
 
             const result = await updateSystemConfig(data)
@@ -184,6 +187,37 @@ export function AdminConfigForm({ initialConfig }: AdminConfigFormProps) {
                         >
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                             Salvar Webhook
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Marketing Settings */}
+                <Card className="bg-slate-900 border-slate-800">
+                    <CardHeader>
+                        <CardTitle className="text-xl text-slate-200">Marketing & Analytics</CardTitle>
+                        <CardDescription className="text-slate-400">Pixels de rastreamento e tags.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="pixelId" className="text-slate-300">Meta Pixel ID (Facebook)</Label>
+                            <Input
+                                id="pixelId"
+                                value={pixelId}
+                                onChange={(e) => setPixelId(e.target.value)}
+                                placeholder="1234567890123456"
+                                className="bg-slate-950 border-slate-800 text-white"
+                            />
+                            <p className="text-xs text-slate-500">O ID numérico do seu pixel. Deixe em branco para desativar.</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                            onClick={() => handleSave('marketing')}
+                            disabled={isLoading}
+                            className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
+                        >
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Salvar Pixel
                         </Button>
                     </CardFooter>
                 </Card>

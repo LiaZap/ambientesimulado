@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { ChevronLeft, ChevronRight, Flag, Plus, Clock, FileText, Pause, Play, LogOut, LayoutGrid } from "lucide-react"
+import { ChevronLeft, ChevronRight, Flag, Plus, Clock, FileText, Pause, Play, LogOut, LayoutGrid, CheckSquare, XCircle } from "lucide-react"
 import { finishExamAttempt } from "@/lib/actions"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
@@ -27,9 +27,10 @@ interface ExamInterfaceProps {
     examId: string
     title: string
     questions: Question[]
+    mode?: 'EXAM' | 'TRAINING'
 }
 
-export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) {
+export function ExamInterface({ examId, title, questions, mode = 'EXAM' }: ExamInterfaceProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [answers, setAnswers] = useState<Record<string, string>>({})
     const [showResult, setShowResult] = useState(false)
@@ -108,76 +109,171 @@ export function ExamInterface({ examId, title, questions }: ExamInterfaceProps) 
         }
     }
 
-    // Render Options Logic (Paper Style)
+    // Render Options Logic (Paper Style or Training Style)
     const renderOptions = () => {
         const isSelected = (val: string) => answers[currentQuestion.id] === val
+        const isAnswered = !!answers[currentQuestion.id]
+        // Training Mode Logic
+        const isCorrect = isAnswered && currentQuestion.correctAnswer === answers[currentQuestion.id]
+        const isTraining = mode === 'TRAINING'
 
         if (currentQuestion.options && typeof currentQuestion.options === 'object' && Object.keys(currentQuestion.options).length > 0) {
             // Multiple Choice (A-E)
             return (
-                <RadioGroup
-                    value={answers[currentQuestion.id] || ''}
-                    onValueChange={handleAnswer}
-                    className="space-y-4"
-                >
-                    {['A', 'B', 'C', 'D', 'E'].map(opt => {
-                        const text = (currentQuestion.options as any)[opt]
-                        if (!text) return null
-                        const selected = isSelected(opt)
-                        return (
-                            <div key={opt}
-                                className={cn(
-                                    "flex items-start space-x-6 p-6 rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
-                                    selected
-                                        ? "border-slate-900 bg-slate-100 shadow-md"
-                                        : "border-slate-200 hover:border-slate-400 hover:bg-white bg-white/50"
-                                )}
-                                onClick={() => handleAnswer(opt)}
-                            >
-                                <div className={cn(
-                                    "flex-shrink-0 h-10 w-10 rounded-full border-2 flex items-center justify-center font-bold text-lg transition-colors z-10",
-                                    selected ? "bg-slate-900 border-slate-900 text-white" : "border-slate-300 text-slate-500 group-hover:border-slate-900 group-hover:text-slate-900"
-                                )}>
-                                    {opt}
-                                </div>
-                                <span className={cn(
-                                    "flex-1 pt-1 text-lg font-medium leading-relaxed z-10 font-serif",
-                                    selected ? "text-slate-900" : "text-slate-700"
-                                )}>{text}</span>
-                            </div>
-                        )
-                    })}
-                </RadioGroup>
-            )
-        } else {
-            // True/False (Cebraspe) - "Folha de Respostas" Style
-            return (
-                <div className="flex justify-center py-12">
+                <div className="space-y-6">
                     <RadioGroup
                         value={answers[currentQuestion.id] || ''}
-                        onValueChange={handleAnswer}
-                        className="flex gap-16 md:gap-24"
+                        onValueChange={(val) => {
+                            if (isTraining && isAnswered) return // Lock if training and already answered
+                            handleAnswer(val)
+                        }}
+                        className="space-y-4"
                     >
-                        <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => handleAnswer('CERTO')}>
-                            <div className={cn(
-                                "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm group-hover:scale-110",
-                                answers[currentQuestion.id] === 'CERTO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900"
-                            )}>
-                                {answers[currentQuestion.id] === 'CERTO' && <div className="h-6 w-6 rounded-full bg-white" />}
-                            </div>
-                            <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Certo</Label>
-                        </div>
+                        {['A', 'B', 'C', 'D', 'E'].map(opt => {
+                            const text = (currentQuestion.options as any)[opt]
+                            if (!text) return null
+                            const selected = isSelected(opt)
 
-                        <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => handleAnswer('ERRADO')}>
-                            <div className={cn(
-                                "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm group-hover:scale-110",
-                                answers[currentQuestion.id] === 'ERRADO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900"
-                            )}>
-                                {answers[currentQuestion.id] === 'ERRADO' && <div className="h-6 w-6 rounded-full bg-white" />}
-                            </div>
-                            <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Errado</Label>
-                        </div>
+                            // Visual States
+                            let styles = "border-slate-200 hover:border-slate-400 hover:bg-white bg-white/50"
+                            let indicatorStyles = "border-slate-300 text-slate-500 group-hover:border-slate-900 group-hover:text-slate-900"
+
+                            if (selected) {
+                                styles = "border-slate-900 bg-slate-100 shadow-md"
+                                indicatorStyles = "bg-slate-900 border-slate-900 text-white"
+                            }
+
+                            // Training Feedback Overrides
+                            if (isTraining && isAnswered) {
+                                if (opt === currentQuestion.correctAnswer) {
+                                    styles = "border-green-500 bg-green-50"
+                                    indicatorStyles = "bg-green-500 border-green-500 text-white"
+                                } else if (selected && opt !== currentQuestion.correctAnswer) {
+                                    styles = "border-red-500 bg-red-50"
+                                    indicatorStyles = "bg-red-500 border-red-500 text-white"
+                                } else {
+                                    styles = "border-slate-100 opacity-50"
+                                }
+                            }
+
+                            return (
+                                <div key={opt}
+                                    className={cn(
+                                        "flex items-start space-x-6 p-6 rounded-xl border transition-all group relative overflow-hidden",
+                                        (!isTraining || !isAnswered) && "cursor-pointer",
+                                        styles
+                                    )}
+                                    onClick={() => {
+                                        if (isTraining && isAnswered) return
+                                        handleAnswer(opt)
+                                    }}
+                                >
+                                    <div className={cn(
+                                        "flex-shrink-0 h-10 w-10 rounded-full border-2 flex items-center justify-center font-bold text-lg transition-colors z-10",
+                                        indicatorStyles
+                                    )}>
+                                        {opt}
+                                    </div>
+                                    <span className={cn(
+                                        "flex-1 pt-1 text-lg font-medium leading-relaxed z-10 font-serif",
+                                        selected ? "text-slate-900" : "text-slate-700"
+                                    )}>{text}</span>
+                                </div>
+                            )
+                        })}
                     </RadioGroup>
+
+                    {/* Explanation Reveal in Training Mode */}
+                    {isTraining && isAnswered && (
+                        <div className={cn(
+                            "p-6 rounded-lg border-l-4 animate-in fade-in slide-in-from-top-4 duration-500",
+                            isCorrect ? "bg-green-50 border-green-500 text-green-900" : "bg-red-50 border-red-500 text-red-900"
+                        )}>
+                            <div className="flex items-center gap-2 mb-2 font-bold uppercase tracking-widest text-sm">
+                                {isCorrect ? <CheckSquare className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                                {isCorrect ? "Resposta Correta!" : "Resposta Incorreta!"}
+                            </div>
+                            <p className="whitespace-pre-wrap">{currentQuestion.explanation || "Sem comentário disponível para esta questão."}</p>
+
+                            {!isCorrect && (
+                                <div className="mt-4 pt-4 border-t border-red-200 text-sm">
+                                    <span className="font-bold">Gabarito: </span> {currentQuestion.correctAnswer}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )
+        } else {
+            // True/False (Cebraspe)
+            return (
+                <div className="space-y-8">
+                    <div className="flex justify-center py-12">
+                        <RadioGroup
+                            value={answers[currentQuestion.id] || ''}
+                            onValueChange={(val) => {
+                                if (isTraining && isAnswered) return
+                                handleAnswer(val)
+                            }}
+                            className="flex gap-16 md:gap-24"
+                        >
+                            {/* Certo Answer */}
+                            <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => {
+                                if (isTraining && isAnswered) return
+                                handleAnswer('CERTO')
+                            }}>
+                                <div className={cn(
+                                    "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm",
+                                    (!isTraining || !isAnswered) && "group-hover:scale-110",
+                                    answers[currentQuestion.id] === 'CERTO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900",
+                                    // Training overrides
+                                    isTraining && isAnswered && currentQuestion.correctAnswer === 'CERTO' && "bg-green-500 border-green-500",
+                                    isTraining && isAnswered && answers[currentQuestion.id] === 'CERTO' && currentQuestion.correctAnswer !== 'CERTO' && "bg-red-500 border-red-500"
+                                )}>
+                                    {(answers[currentQuestion.id] === 'CERTO' || (isTraining && isAnswered && currentQuestion.correctAnswer === 'CERTO')) && <div className="h-6 w-6 rounded-full bg-white" />}
+                                </div>
+                                <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Certo</Label>
+                            </div>
+
+                            {/* Errado Answer */}
+                            <div className="flex flex-col items-center gap-4 cursor-pointer group" onClick={() => {
+                                if (isTraining && isAnswered) return
+                                handleAnswer('ERRADO')
+                            }}>
+                                <div className={cn(
+                                    "h-16 w-16 rounded-full border-4 flex items-center justify-center transition-all shadow-sm",
+                                    (!isTraining || !isAnswered) && "group-hover:scale-110",
+                                    answers[currentQuestion.id] === 'ERRADO' ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300 group-hover:border-slate-900",
+                                    // Training overrides
+                                    isTraining && isAnswered && currentQuestion.correctAnswer === 'ERRADO' && "bg-green-500 border-green-500",
+                                    isTraining && isAnswered && answers[currentQuestion.id] === 'ERRADO' && currentQuestion.correctAnswer !== 'ERRADO' && "bg-red-500 border-red-500"
+                                )}>
+                                    {(answers[currentQuestion.id] === 'ERRADO' || (isTraining && isAnswered && currentQuestion.correctAnswer === 'ERRADO')) && <div className="h-6 w-6 rounded-full bg-white" />}
+                                </div>
+                                <Label className="font-sans font-bold text-xl cursor-pointer text-slate-700 uppercase tracking-widest group-hover:text-slate-900">Errado</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    {/* Explanation Reveal in Training Mode */}
+                    {isTraining && isAnswered && (
+                        <div className={cn(
+                            "p-6 rounded-lg border-l-4 animate-in fade-in slide-in-from-top-4 duration-500",
+                            isCorrect ? "bg-green-50 border-green-500 text-green-900" : "bg-red-50 border-red-500 text-red-900"
+                        )}>
+                            <div className="flex items-center gap-2 mb-2 font-bold uppercase tracking-widest text-sm">
+                                {isCorrect ? <CheckSquare className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                                {isCorrect ? "Resposta Correta!" : "Resposta Incorreta!"}
+                            </div>
+                            <p className="whitespace-pre-wrap">{currentQuestion.explanation || "Sem comentário disponível para esta questão."}</p>
+
+                            {!isCorrect && (
+                                <div className="mt-4 pt-4 border-t border-red-200 text-sm">
+                                    <span className="font-bold">Gabarito: </span> {currentQuestion.correctAnswer}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )
         }

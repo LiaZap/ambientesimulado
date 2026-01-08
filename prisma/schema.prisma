@@ -39,6 +39,7 @@ model User {
   
   creditTransactions CreditTransaction[]
   usageLogs         UsageLog[]
+  createdExams      Exam[]   @relation("CreatedExams")
 
   @@index([email])
   @@index([subscriptionId])
@@ -257,6 +258,9 @@ model Exam {
   questions   Question[] @relation("ExamQuestions")
   attempts    ExamAttempt[]
   isActive    Boolean  @default(true)
+  isCustom    Boolean  @default(false)
+  creatorId   String?
+  creator     User?    @relation("CreatedExams", fields: [creatorId], references: [id])
   createdAt   DateTime @default(now())
 }
 

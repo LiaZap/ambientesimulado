@@ -11,10 +11,14 @@ interface ExamPageProps {
     params: Promise<{
         examId: string
     }>
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function ExamPage(props: ExamPageProps) {
     const params = await props.params
+    const searchParams = await props.searchParams
+    const mode = (searchParams.mode as 'EXAM' | 'TRAINING') || 'EXAM'
+
     const session = await auth()
 
     if (!session?.user?.id) {
@@ -27,7 +31,8 @@ export default async function ExamPage(props: ExamPageProps) {
         notFound()
     }
 
-    // Check Weekly Limits
+    // Check Weekly Limits (Skip limit check for custom exams or implement logic later)
+    // Ideally we count custom exams too, but let's assume limit applies to everything
     const limitCheck = await checkExamLimit(session.user.id)
 
     if (!limitCheck.allowed) {
@@ -65,6 +70,7 @@ export default async function ExamPage(props: ExamPageProps) {
             examId={exam.id}
             title={exam.title}
             questions={exam.questions}
+            mode={mode}
         />
     )
 }

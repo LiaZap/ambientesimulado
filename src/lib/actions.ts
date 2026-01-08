@@ -1361,3 +1361,54 @@ export async function getUser(userId: string) {
         include: { profile: true }
     })
 }
+
+// --- SMART EXAM BUILDER ---
+export async function createCustomExam(data: { subjects: string[], count: number, title: string }) {
+    const session = await auth()
+    if (!session?.user?.id) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        // 1. Get Questions randomly using raw query for performance on random sort
+        // Prisma doesn't support random sorting natively well without raw
+        // We filter by subjects if provided
+
+        let subjectsCondition = ""
+        if (data.subjects && data.subjects.length > 0) {
+            const subjectList = data.subjects.map(s => `'${s}'`).join(", ")
+            subjectsCondition = `AND "subject"::text IN (${subjectList})`
+        }
+
+        const limit = Math.min(Math.max(data.count, 5), 120) // Min 5, Max 120
+
+        const questions: { id: string }[] = await prisma.$queryRawUnsafe(
+            `SELECT id FROM "Question" WHERE 1=1 ${subjectsCondition} ORDER BY RANDOM() LIMIT ${limit}`
+        )
+
+        if (questions.length === 0) {
+            return { success: false, error: "Nenhuma questão encontrada para os critérios selecionados." }
+        }
+
+        // 2. Create Custom Exam
+        const exam = await prisma.exam.create({
+            data: {
+                title: data.title || "Treino Personalizado",
+                description: `Simulado gerado automaticamente com ${questions.length} questões.`,
+                totalQuestions: questions.length,
+                duration: questions.length * 3, // 3 min per question
+                isCustom: true,
+                creatorId: session.user.id,
+                questions: {
+                    connect: questions.map(q => ({ id: q.id }))
+                }
+            }
+        })
+
+        return { success: true, examId: exam.id }
+
+    } catch (error) {
+        console.error("Error creating custom exam:", error)
+        return { success: false, error: "Erro ao gerar simulado." }
+    }
+}

@@ -6,6 +6,7 @@ import { SmartExamBuilder } from "@/components/exam/smart-exam-builder"
 import { CreateQuestionDialog } from "@/components/exam/create-question-dialog"
 import { auth } from "@/lib/auth"
 import { ExamCard } from "@/components/exam/exam-card"
+import { MockExamTemplateCard } from "@/components/exam/mock-exam-template-card"
 
 export const metadata = {
     title: "Simulados | PRF Ambiente Simulado",
@@ -24,6 +25,19 @@ export default async function SimuladosPage() {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             <SmartExamBuilder />
+
+            {/* Rumo à PRF Template Section */}
+            <div className="mb-12">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <Target className="h-6 w-6 text-yellow-500" />
+                    Área de Simulados - Rumo à PRF
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                        <MockExamTemplateCard key={i + 1} number={i + 1} />
+                    ))}
+                </div>
+            </div>
 
             {/* Custom Exams Section */}
             {myCustomExams.length > 0 && (
